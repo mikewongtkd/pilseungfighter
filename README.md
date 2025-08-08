@@ -30,11 +30,34 @@ Athletes aged 41 and older may compete at this level, fighting for one (1) round
 
 ### Scoring Criteria
 
-The main scoring criteria for 
+The main scoring criteria is *Presentation* which represents the judges interest in seeing the contestant fight. 
+
+Conditions that would improve a judges interest in a contestant include: 
+
+1. Exciting, dynamic offensive techniques and smart and practical defensive techniques
+2. Lots of action
+3. Powerful techniques that deliver trembling shock to the opponent's valid scoring areas
+4. Good sportsmanship, clean technique, and self-control
+5. Clear mastery of combat sport, strategy, charisma, and athleticism
+
+Conditions that would reduce a judges interest in a contestant include: 
+
+1. Inactivity or avoidance 
+2. Unforced poor technique
+3. Repetitive or weak techniques
+4. Poor sportsmanship
+5. "Dirty" fighting
 
 ### Penalties
 
+Infractions that are scored by the judges by a 0.1 deduction from presentation:
 
+1. Pushing an opponent out of bounds or pushing the kicking opponent
+
+Infractions that are scored by the referee by activating the penalty timer:
+
+1. Grabbing
+2. Falling
 
 ### Cutoff Method
 
@@ -43,3 +66,5 @@ The goal of this method is to produce a partially ordered list such that
 ### Judge Scoring
 
 Judges score the fighters
+
+<!-- vim: set wrap linebreak -->

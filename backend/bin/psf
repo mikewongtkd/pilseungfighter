@@ -1,0 +1,112 @@
+#! /usr/bin/perl
+
+use lib qw( /usr/local/psf/lib );
+use Mojolicious::Lite;
+use Mojo::IOLoop::Delay;
+use Try::Tiny;
+use PSF::Config;
+use PSF::Client::Registry;
+use PSF::Manager;
+use PHP::Session;
+use JSON::XS;
+use Digest::SHA1 qw( sha1_hex );
+use List::MoreUtils (qw( first_index ));
+use MIME::Base64 qw( encode_base64 decode_base64 );
+use Data::Dumper;
+use Clone qw( clone );
+use EV;
+
+our $json     = (new JSON::XS())->boolean_values( 0, 1 );
+our $client   = {};
+our $config   = new PSF::Config();
+our $registry = new PSF::Client::Registry();
+our $DEBUG    = 0;
+
+# ------------------------------------------------------------
+# MANAGE RINGS, DIVISIONS, AND ATHLETES VIA WEBSOCKETS
+# ------------------------------------------------------------
+websocket '/:ring/:user' => sub {
+	my $self    = shift;
+	my $rnum    = $self->param( 'ring' );
+	my $client  = $registry->add( $self, $rnum );
+	my $manager = new PSF::Manager( $rnum, $client );
+	my $ring    = undef;
+
+	$self->inactivity_timeout( 3600 ); # 1 hour
+	$client->ping->start();
+
+	# ----------------------------------------
+	# Handle messages
+	# ----------------------------------------
+	$self->on( message => sub {
+		my $self    = shift;
+		my $request = $json->decode( shift );
+
+		# ===== REJECT UNAUTHORIZED USERS
+		my $security   = $config->security();
+		if( $security->enabled() ) {
+			unless( $security->authenticated( $client ) && $security->authorized( $rnum )) {
+				$client->send( { json => { error => $security->unauthorized(), request => $request }});
+				return;
+			}
+		}
+
+		$request->{ ring }       = $rnum;
+		$request->{ from }       = { cid => $client->cid(), role => $client->role() };
+
+		# ===== READ RING
+		try   { 
+			$ring = new PSF::Division( $rnum ); 
+
+		} catch { 
+			$client->send( { json => { error => "Error reading database '$tournament', ring $rnum: $_" }}); 
+
+		};
+
+		# ===== HANDLE REQUEST
+		try { 
+			$manager->handle( $request, $ring, $client->group() ); 
+
+		} catch { 
+			$client->send( { json => { error => "Error while processing request: $_\n", request => $request }}); 
+
+		};
+		print STDERR "\n" if $DEBUG;
+	});
+
+	# ----------------------------------------
+	# Handle disconnects
+	# ----------------------------------------
+	$self->on( finish => sub { 
+		my $request = { type => 'user', action => 'update', ring => $rnum, user => { action => 'disconnect', sessid => $client->sessid(), id => $client->id(), role => $client->role() }};
+		$registry->remove( $client );
+		$manager->broadcast_updated_users( $request, $ring, $client->group());
+		$client->ping->quit();
+	});
+};
+
+# ============================================================
+# STATUS
+# ============================================================
+get '/status' => sub {
+	my $self = shift;
+	$self->res->headers->header( 'Access-Control-Allow-Origin' => $config->host() );
+	$self->render( text => 'OK' );
+};
+
+# ============================================================
+# ERROR TRAPPING
+# ============================================================
+any '*command' => sub {
+	my $self = shift;
+	my $command = $self->param( 'command' );
+	$self->res->headers->header( 'Access-Control-Allow-Origin' => $config->host() );
+	$self->render( json => { error => "PSF Service Error: Unknown command: $command" });
+};
+
+# ============================================================
+# HYPNOTOAD SERVER
+# ============================================================
+app->config( hypnotoad => { listen => [ 'http://*:3088' ], pid_file => '/var/run/psf.pid', workers => 1 });
+app->log( new Mojo::Log( path => '/var/log/psf.log', level => 'debug' ));
+app->start();
