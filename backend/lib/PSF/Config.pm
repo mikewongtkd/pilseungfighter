@@ -82,7 +82,7 @@ sub secured {
 sub security {
 # ============================================================
 	my $self = shift;
-	return new FreeScore::Security( $self );
+	return new PSF::Security( $self );
 }
 
 

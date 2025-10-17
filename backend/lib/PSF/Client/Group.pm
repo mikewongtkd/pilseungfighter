@@ -23,10 +23,10 @@ sub init {
 	if( /^staging/i ) {
 		$self->{ id } = lc "staging";
 
-	} elsif( /^ring\d+$/i ) {
-		$self->{ id } = lc "$ring";
+	} elsif( /^ring\d{2}$/i ) {
+		$self->{ id } = lc $ring;
 
-	} elsif( /^\d+$/ ) {
+	} elsif( /^\d{2}$/ ) {
 		$self->{ id } = sprintf( "ring%02d", $ring );
 
 	} else {

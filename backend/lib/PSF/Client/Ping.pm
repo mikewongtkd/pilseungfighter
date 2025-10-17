@@ -3,7 +3,6 @@ use lib qw( /usr/local/psf/lib );
 use base qw( Clone );
 use List::Util qw( sum );
 use Data::Structure::Util qw( unbless );
-use Date::Manip;
 use JSON::XS;
 use Mojolicious::Controller;
 use Mojo::IOLoop;
@@ -27,9 +26,10 @@ sub init {
 
 	$self->{ pings }       = {};
 	$self->{ client }      = $client;
-	$client->{ timedelta } = 0;
+	$client->{ drop_time } = 0;
 	$self->{ timestats }   = new Statistics::Descriptive::Full();
 	$self->{ speed } = { normal => 30, fast => 15, faster => 5, fastest => 1 };
+	$self->{ rates } = { strong => 1 / $self->{ speed }{ normal }, good => 1 / $self->{ speed }{ fast }, weak => 1 / $self->{ speed }{ faster }, bad => 1 / $self->{ speed }{ fastest }};
 }
 
 # ============================================================
@@ -77,14 +77,17 @@ sub go {
 # ============================================================
 sub health {
 # ============================================================
-	my $self = shift;
-	my $dropped = int( keys %{$self->{ pings }});
+	my $self      = shift;
+	my $drop_time = $self->{ drop_time };
+	my $dropped   = int( keys %{$self->{ pings }});
 
-	return 'strong' if( $dropped <= 1  );
-	return 'good'   if( $dropped <= 5  );
-	return 'weak'   if( $dropped <= 10 );
-	return 'bad'    if( $dropped <= 20 );
-	return 'dead'   if( $dropped >  20 );
+	my $drop_rate = $drop_time == 0 ? 0 : $dropped / $drop_time;
+
+	return 'strong' if( $drop_rate <= $self->{ rates }{ strong });
+	return 'good'   if( $drop_rate <= $self->{ rates }{ good });
+	return 'weak'   if( $drop_rate <= $self->{ rates }{ weak });
+	return 'bad'    if( $drop_rate <= $self->{ rates }{ bad });
+	return 'dead'   if( $drop_rate >  $self->{ rates }{ bad });
 }
 
 # ============================================================
@@ -98,23 +101,16 @@ sub normal {
 sub pong {
 # ============================================================
 	my $self      = shift;
-	my $server_ts = shift;
-	my $client_ts = shift;
+	my $ping      = shift;
 	my $client    = $self->{ client };
+	my $pingts    = $ping->{ timestamp };
+	my $pongts    = time();
+	my $dropped   = [ keys %{ $self->{ pings }}];
 
-	delete $self->{ pings }{ $server_ts } if( exists $self->{ pings }{ $server_ts });
+	delete $self->{ pings }{ $pingts } if( exists $self->{ pings }{ $pingts });
 
-	try {
-		my $date1     = new Date::Manip::Date( $server_ts );
-		my $date2     = new Date::Manip::Date( $client_ts );
-		my $delta     = $date1->calc( $date2 );
-
-		$self->{ timestats }->add_data( _total_seconds( $delta ));
-		$client->{ timedelta } = $self->{ timestats }->mean();
-	} catch {
-
-		print STDERR "One or more invalid dates ($server_ts, $client_ts) $_";
-	};
+	$self->{ timestats }->add_data( abs( $pongts - $pingts ));
+	$client->{ drop_time } = $self->{ timestats }->mean();
 
 	my $health = $self->health();
 
@@ -126,6 +122,18 @@ sub pong {
 
 	my $changed = $health eq $self->{ health } ? 0 : 1;
 	$self->{ health } = $health;
+
+	# Clear out older pings
+	if( int( @$dropped ) > 30 ) {
+		my ($oldest) = sort { $a <=> $b } map { int( $_ ) } @$dropped;
+		my $limit    = 0;
+
+		while( int( @$dropped ) > 30 && $limit < 10 ) {
+			delete $self->{ pings }{ $oldest };
+			my $dropped = [ keys %{ $self->{ pings }}];
+			$limit++;
+		}
+	}
 
 	return $changed;
 }
@@ -155,7 +163,7 @@ sub start {
 	$self->{ interval } = $interval;
 
 	$self->{ id } = Mojo::IOLoop->recurring( $interval => sub ( $ioloop ) {
-		my $now = (new Date::Manip::Date( 'now GMT' ))->printf( '%O' ) . 'Z';
+		my $now = time();
 		$self->{ pings }{ $now } = 1;
 
 		my $ping = { type => 'server', action => 'ping', ring => $client->ring(), cid => $client->cid(), gid => $client->gid(), role => $client->role(), server => { timestamp => $now }};
@@ -173,14 +181,6 @@ sub stop {
 
 	Mojo::IOLoop->remove( $id );
 	delete $self->{ id };
-}
-
-# ============================================================
-sub _total_seconds {
-# ============================================================
-	my $delta = shift;
-	my $weight = { h => 3600, m => 60, s => 1 };
-	return sum map { int( $delta->printf( "\%$_\v" )) * $weight->{ $_ } } qw( h m s );
 }
 
 1;

@@ -4,9 +4,7 @@ use lib qw( /usr/local/psf/lib );
 use Mojolicious::Lite;
 use Mojo::IOLoop::Delay;
 use Try::Tiny;
-use PSF::Config;
-use PSF::Client::Registry;
-use PSF::Manager;
+use PSF::Server;
 use PHP::Session;
 use JSON::XS;
 use Digest::SHA1 qw( sha1_hex );
@@ -17,19 +15,16 @@ use Clone qw( clone );
 use EV;
 
 our $json     = (new JSON::XS())->boolean_values( 0, 1 );
-our $client   = {};
-our $config   = new PSF::Config();
-our $registry = new PSF::Client::Registry();
+our $server   = new PSF::Server();
 our $DEBUG    = 0;
 
 # ------------------------------------------------------------
 # MANAGE RINGS, DIVISIONS, AND ATHLETES VIA WEBSOCKETS
 # ------------------------------------------------------------
-websocket '/:ring/:user' => sub {
+websocket '/:ring/:role' => sub {
 	my $self    = shift;
 	my $rnum    = $self->param( 'ring' );
-	my $client  = $registry->add( $self, $rnum );
-	my $manager = new PSF::Manager( $rnum, $client );
+	my $client  = $server->registry->add( $self, $rnum );
 	my $ring    = undef;
 
 	$self->inactivity_timeout( 3600 ); # 1 hour
@@ -43,32 +38,23 @@ websocket '/:ring/:user' => sub {
 		my $request = $json->decode( shift );
 
 		# ===== REJECT UNAUTHORIZED USERS
-		my $security   = $config->security();
+		my $security   = $server->config->security();
 		if( $security->enabled() ) {
 			unless( $security->authenticated( $client ) && $security->authorized( $rnum )) {
-				$client->send( { json => { error => $security->unauthorized(), request => $request }});
+				$server->send->client( { json => { error => $security->unauthorized(), request => $request }});
 				return;
 			}
 		}
 
-		$request->{ ring }       = $rnum;
-		$request->{ from }       = { cid => $client->cid(), role => $client->role() };
-
-		# ===== READ RING
-		try   { 
-			$ring = new PSF::Division( $rnum ); 
-
-		} catch { 
-			$client->send( { json => { error => "Error reading database '$tournament', ring $rnum: $_" }}); 
-
-		};
+		$request->{ ring } = $rnum;
+		$request->{ from } = $client->cid();
 
 		# ===== HANDLE REQUEST
 		try { 
-			$manager->handle( $request, $ring, $client->group() ); 
+			$server->handle( $request ); 
 
 		} catch { 
-			$client->send( { json => { error => "Error while processing request: $_\n", request => $request }}); 
+			$server->send->client({ json => { error => "Error while processing request: $_\n", request => $request }}); 
 
 		};
 		print STDERR "\n" if $DEBUG;
@@ -79,8 +65,8 @@ websocket '/:ring/:user' => sub {
 	# ----------------------------------------
 	$self->on( finish => sub { 
 		my $request = { type => 'user', action => 'update', ring => $rnum, user => { action => 'disconnect', sessid => $client->sessid(), id => $client->id(), role => $client->role() }};
-		$registry->remove( $client );
-		$manager->broadcast_updated_users( $request, $ring, $client->group());
+		$server->registry->remove( $client );
+		$server->broadcast_updated_users( $request, $ring, $client->group());
 		$client->ping->quit();
 	});
 };
@@ -90,7 +76,7 @@ websocket '/:ring/:user' => sub {
 # ============================================================
 get '/status' => sub {
 	my $self = shift;
-	$self->res->headers->header( 'Access-Control-Allow-Origin' => $config->host() );
+	$self->res->headers->header( 'Access-Control-Allow-Origin' => $server->config->host() );
 	$self->render( text => 'OK' );
 };
 
@@ -100,7 +86,7 @@ get '/status' => sub {
 any '*command' => sub {
 	my $self = shift;
 	my $command = $self->param( 'command' );
-	$self->res->headers->header( 'Access-Control-Allow-Origin' => $config->host() );
+	$self->res->headers->header( 'Access-Control-Allow-Origin' => $server->config->host() );
 	$self->render( json => { error => "PSF Service Error: Unknown command: $command" });
 };
 

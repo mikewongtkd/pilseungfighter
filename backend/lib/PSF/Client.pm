@@ -31,12 +31,11 @@ sub init {
 	$role =~ s/\+/ /g;
 
 	$self->{ id }         = $id;
-	$self->{ ring }       = $ring eq 'staging' ? $ring : int( $ring );
+	$self->{ ring }       = _parse_ring( $ring );
 	$self->{ sessid }     = $sessid;
 	$self->{ role }       = $role;
 	$self->{ device }     = $connection;
 	$self->{ websocket }  = $websocket;
-	$self->{ status }     = 'strong'; 
 }
 
 # ============================================================
@@ -90,7 +89,10 @@ sub json {
 	my $json  = new JSON::XS();
 
 	# Remove nested objects
-	delete $clone->{ $_ } foreach qw( device ping websocket );
+	foreach my $key (qw( device ping websocket )) {
+		next unless exists $clone->{ $_ };
+		delete $clone->{ $_ } 
+	}
 
 	return $json->canonical->encode( $clone );
 }
@@ -141,5 +143,18 @@ sub ring       { my $self = shift; return $self->{ ring };       }
 sub role       { my $self = shift; return $self->{ role };       }
 sub sessid     { my $self = shift; return $self->{ sessid };     }
 sub timedelta  { my $self = shift; return $self->{ timedelta };  }
+
+sub _parse_ring {
+	my $ring = shift;
+	if( $ring =~ /^\d{1,2}$/ ) {
+		$ring = sprintf( "ring%02d", int( $ring ));
+
+	} elsif( $ring =~ /^ring\d{2}$/i || $ring =~ /^staging$/i ) {
+		$ring = lc $ring;
+
+	} else {
+		$self->send( json => "Client Registration Error: Ring $ring is invalid.\n" );
+	}
+}
 
 1;
