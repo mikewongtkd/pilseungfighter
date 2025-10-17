@@ -107,6 +107,6 @@ any '*command' => sub {
 # ============================================================
 # HYPNOTOAD SERVER
 # ============================================================
-app->config( hypnotoad => { listen => [ 'http://*:3088' ], pid_file => '/var/run/psf.pid', workers => 1 });
+app->config( hypnotoad => { listen => [ 'http://*:3030' ], pid_file => '/var/run/psf.pid', workers => 1 });
 app->log( new Mojo::Log( path => '/var/log/psf.log', level => 'debug' ));
 app->start();
