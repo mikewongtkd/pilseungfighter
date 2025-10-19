@@ -34,25 +34,28 @@ The main scoring criteria is *Presentation* which represents the judges interest
 
 Conditions that would improve a judges interest in a contestant include: 
 
-1. Exciting, dynamic offensive techniques and smart and practical defensive techniques
-2. Lots of action
+1. Actively attacking or defending
+2. Exciting, dynamic offensive techniques and smart and practical defensive techniques
 3. Powerful techniques that deliver trembling shock to the opponent's valid scoring areas
 4. Good sportsmanship, clean technique, and self-control
 5. Clear mastery of combat sport, strategy, charisma, and athleticism
 
 Conditions that would reduce a judges interest in a contestant include: 
 
-1. Inactivity or avoidance 
-2. Unforced poor technique
-3. Repetitive or weak techniques
-4. Poor sportsmanship
-5. "Dirty" fighting
+1. Unforced poor technique
+2. Repetitive or weak techniques
+3. Poor sportsmanship
+4. "Dirty" fighting
+
+Contestants are automatically penalized over time for inactivity.
 
 ### Penalties
 
 Infractions that are scored by the judges by a 0.1 deduction from presentation:
 
-1. Pushing an opponent out of bounds or pushing the kicking opponent
+1. Avoidance
+2. Pushing an opponent out of bounds or pushing the kicking opponent
+3. Low kick
 
 Infractions that are scored by the referee by activating the penalty timer:
 

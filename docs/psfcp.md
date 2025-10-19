@@ -18,16 +18,42 @@ One notable exception is server pings to gauge client connection strength.
 - ring: rnum
 - *other parameters as needed*
 
+### Responses
+
+    {
+        "request": <request>
+        "subject": bracket | contestant | division | match | ring | round,
+        <subject>
+    }
+
 ## Subjects
 
 ### Match
 
-#### Match Score Request
+A minimal request template is shown below. Requests are based on the minimal template, with the listed *action* specified and additional parameters specified as needed.
+
+**Minimal Request**
 
     {
         "subject": "match",
-        "action": "score",
+        "action": <action>,
         "from": <cid>,
-        "ring": <rnum>,
-        "presentation" : -0.1 | 0.1
+        "ring": <rnum>
     }
+
+#### Match Read
+
+    "action" : "read"
+
+#### Match Score
+
+    "action" : "score",
+    "contestant" : chung | hong
+    "presentation" : -0.1 | 0.1
+
+#### Match Update
+
+    "action" : "update"
+    <parameter to update> : <parameter value>
+
+Examples
