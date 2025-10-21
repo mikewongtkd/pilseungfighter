@@ -63,5 +63,4 @@ sub group {
 	print STDERR "\n" if $DEBUG;
 }
 
-}
 1;

@@ -36,7 +36,7 @@ sub init {
 	$self->{ _config }     = new PSF::Config();
 	$self->{ _registery }  = new PSF::Client::Registry();
 	$self->{ _comms }      = new PSF::Server::Comms( $self );
-	$self->{ _json }       = new JSON::XS();
+	$self->{ _json }       = (new JSON::XS())->boolean_values( 0, 1 );
 	$self->{ match }       = {
 		read               => \&handle_match_read,
 		score              => \&handle_match_score,
@@ -58,6 +58,13 @@ sub config {
 # ============================================================
 	my $self = shift;
 	return $self->{ _config };
+}
+
+# ============================================================
+sub json {
+# ============================================================
+	my $self = shift;
+	return $self->{ _json };
 }
 
 # ============================================================

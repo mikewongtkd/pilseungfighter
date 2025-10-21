@@ -4,7 +4,7 @@
 # Devel Tools
 # ============================================================
 apt-get update
-apt-get install -y sudo vim cpanminus
+apt-get install -y sudo vim zip libssl-dev cpanminus
 
 cpanm install \
 	Carp \
@@ -24,11 +24,13 @@ cpanm install \
 	GD::Barcode \
 	JSON::XS \
 	LWP::UserAgent \
+	Lingua::EN::Inflexion \
 	List::MoreUtils \
 	Math::Round \
 	Math::Utils \
 	Mojolicious \
 	Mojo::IOLoop::Delay \
+	PHP::Functions::Password \
 	PHP::Session \
 	Scalar::Util \
 	Statistics::Descriptive \
@@ -39,6 +41,7 @@ cpanm install \
 	Time::HiRes \
 	Time::Piece \
 	Try::Tiny \
+	UUID \
 	YAML
 
 a2enmod proxy proxy_http proxy_wstunnel
