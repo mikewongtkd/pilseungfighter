@@ -1,6 +1,7 @@
 package PSF::DBO;
 
 use base qw( Clone );
+use Clone qw( clone );
 use Data::Dumper;
 use Data::Structure::Util qw( unbless );
 use DBI;
@@ -15,45 +16,53 @@ our $sth  = {};
 our $json = new JSON::XS();
 our $statement = {
 	delete     => "update document set deleted = datetime( 'now' ) where uuid=? and deleted is null",
-	exists     => 'select count(*) from document where uuid=? and deleted is null',
+	exists     => 'select count(*) > 0 from document where uuid=? and deleted is null',
 	get        => 'select * from document where uuid=? and deleted is null',
 	insert     => 'insert into document (uuid, class, data) values (?, ?, ?)',
-	joins      => "select * from document where class='Join' and json_extract( document.data, ? ) = ? and json_extract( document.data, ? ) is not null",
-	references => "select * from document where class like ? and json_extract( document.data, ? ) = ?",
-	restore    => 'update document set deleted = null where uuid=?',
+	references => "select * from document where upper( class ) like :class and case when :column = :uuid or :column like '[%:uuid%]' and deleted is null",
+	restore    => 'update document set deleted = null where uuid=? and deleted is not null',
 	update     => "update document set data=?, modified = datetime( 'now' ) where uuid=?"
 };
 
 # ============================================================
 sub new {
 # ============================================================
-	my ($class) = map { ref || $_ } shift;
-	my $table   = _class( $class );
-	my $self    = bless {}, $class;
-	my $n       = int( @_ );
+# \brief Creates a new object or, given a UUID, retrieves an 
+# existing object
+# ------------------------------------------------------------
+	my ($package) = map { ref || $_ } shift;
+	my $class     = _class( $package );
+	my $self      = bless {}, $package;
+	my $n         = int( @_ );
+	my $guuid     = _generate_uuid();
 
-	my $guuid   = _generate_uuid();
-
+	# No parameters provided; create a new object
 	if( $n == 0 ) {
 		$self->{ uuid }  = $guuid;
-		$self->{ class } = $table;
-		$self->{ data }  = {};
+		$self->{ class } = $class;
+		$self->{ data }  = $package->defaults();
 
-		warn "Extra parameters when initiating $class were ignored $!" if( $n > 2 );
-
+	# One parameter provided; if it's a UUID, then look it up
 	} elsif( $n == 1 ) {
 		my $uuid = shift;
+		die "DB Error: Invalid UUID provided '$uuid' for $package lookup $!" unless _is_uuid( $uuid );
+
+		# If the object exists, return it
 		return _get( $uuid ) if( _exists( $uuid ));
 
+		# Otherwise create a new object
 		$self->{ uuid }  = $uuid;
-		$self->{ class } = $table;
-		$self->{ data }  = {};
+		$self->{ class } = $class;
+		$self->{ data }  = $package->defaults();
 
+	# More than one parameter provided, create a new object and assign given parameters
 	} elsif( $n > 1 ) { 
+		die "DB Error: Ambiguous instantiation; odd number of parameters provided $!" if $n % 2;
 		$self->{ uuid }  = $guuid;
-		$self->{ class } = $table;
-		$self->{ data }  = { @_ };
+		$self->{ class } = $class;
+		$self->{ data }  = { %{ $package->defaults() }, @_ };
 		$self->{ uuid }  = $self->{ data }{ uuid } if( exists $self->{ data }{ uuid });
+
 	}
 
 	$self->write();
@@ -65,6 +74,13 @@ sub class {
 # ============================================================
 	my $self = shift;
 	return $self->{ class };
+}
+
+# ============================================================
+sub defaults {
+# ============================================================
+	my $class = shift;
+	return clone( ${"$class\:\:defaults"} );
 }
 
 # ============================================================
@@ -87,6 +103,12 @@ sub document {
 # ============================================================
 sub get {
 # ============================================================
+# \brief Retrieves a given field for an object. If the field
+# value is a UUID or an array of UUIDs, returns the 
+# corresponding object.
+# \param $query: Object field query
+# \param $filter: Object filter
+# ------------------------------------------------------------
 	my $self   = shift;
 	my $query  = shift;
 	my $filter = shift;
@@ -99,12 +121,13 @@ sub get {
 	}
 
 	my $plural = noun( $query )->is_plural;
-	my $key    = lc( $plural ? noun( $query )->singular : $query );
+
+	$query = lc( $plural ? noun( $query )->singular : $query );
 
 	# ===== RETURN DATA OR INTERNAL REFERENCE IF IT EXISTS
 	# Internal references are provided within the data (e.g. belongs-to relationships)
-	if( exists $self->{ data }{ $key }) {
-		my $results = $self->{ data }{ $key };
+	if( exists $self->{ data }{ $query }) {
+		my $results = $self->{ data }{ $query };
 
 		# ===== IF REQUESTED AS A PLURAL, RETURN AN ARRAY
 		if( $plural ) {
@@ -122,7 +145,10 @@ sub get {
 
 		# ===== IF REQUESTED AS SINGULAR, RETURN AN A SINGLE VALUE OR DOCUMENT
 		} else {
-			$results = shift @$results if( ref $results eq 'ARRAY' );
+			if( ref $results eq 'ARRAY' ) {
+				_filter( $results, $filter );
+				$results = shift @$results;
+			}
 			$results = _get( $results ) if( _is_uuid( $results ));
 			return $results;
 		}
@@ -131,19 +157,23 @@ sub get {
 	# External references are provided by documents that have the current class
 	# as a field
 	} else {
-		my $mine       = ucfirst( $key );
-		my $ref        = lc _field( ref $self );
-		my $me         = $self->uuid();
-		my $references = _find_references( $mine, $ref, $me );
+		my $docs       = $query;
+		my $column     = lc _field( ref $self );
+		my $uuid       = $self->uuid();
+		my $references = _find_references( $docs, $column, $uuid );
+		my @allowed    = qw( bracket contestant match ring round update chung hong );
+
+		if( ! grep { $_ eq $column } @allowed ) {
+			warn "$column is not valid.\n";
+			return ();
+
+		}
 
 		if( $plural ) {
 			return @$references;
 
 		} else {
-			if( int( @$references ) == 0 ) {
-				warn "$key is not defined.\n";
-				return;
-			}
+			return undef unless int( @$references );
 			return shift @$references;
 		}
 	}
@@ -170,12 +200,12 @@ sub search {
 	my @where  = map { "$_ like ?" } keys %query;
 
 	$sql .= ' from document where class="' . $class . '" and ' . join( ' and ', @where ) . ' and deleted is null';
-	my $sth = $Simsa::DBO::dbh->prepare( $sql );
+	my $sth = $PSF::DBO::dbh->prepare( $sql );
 	$sth->execute( values %query );
 	my @rows = ();
 	while( my $row = $sth->fetchrow_hashref()) {
 		my $uuid = $row->{ uuid };
-		push @rows, "Simsa::$class"->new( $uuid );
+		push @rows, "PSF::$class"->new( $uuid );
 	}
 	return @rows;
 }
@@ -227,22 +257,28 @@ sub AUTOLOAD {
 	my $self   = shift;
 	my $n      = int( @_ );
 
-	if( $n == 1 ) {
+	# ===== No values provided; get field
+	if( $n == 0 ) {
+		return $self->get( $AUTOLOAD );
+
+	# ===== One value provided; set field to value
+	} elsif ( $n == 1 ) {
 		my $value = shift;
 		my $field = _field( $AUTOLOAD );
 		$self->set( $field, $value );
 
-	} elsif( $n > 1 ) {
+	# ===== Two fields; a WHERE clause, and a hashref of conditions
+	} elsif( $n == 2 ) {
 		if( $_[ 0 ] eq 'where' ) {
 			my $filter = $_[ 1 ];
 			return $self->get( $AUTOLOAD, $filter );
 
 		} else {
-			warn "Extra parameters to $AUTOLOAD were ignored $!";
+			die "Malformed query for $AUTOLOAD (use: where => { ... } instead) $!";
 		}
 
 	} else {
-		return $self->get( $AUTOLOAD );
+		die "Malformed query $AUTOLOAD $!";
 	}
 
 	return;
@@ -252,16 +288,16 @@ sub AUTOLOAD {
 sub _class {
 # ============================================================
 	my $class = shift;
-	my @namespaces = grep { ! /^Simsa$/ } split /::/, $class;
+	my @namespaces = grep { ! /^PSF$/ } split /::/, $class;
 
-	$class = join( '::', @namespaces );
+	$class = join( '', @namespaces );
 	return $class;
 }
 
 # ============================================================
 sub _db_connect {
 # ============================================================
-	$Simsa::DBO::dbh = DBI->connect( 'dbi:SQLite:db.sqlite' ) if( ! defined $Simsa::DBO::dbh );
+	$PSF::DBO::dbh = DBI->connect( 'dbi:SQLite:db.sqlite' ) if( ! defined $PSF::DBO::dbh );
 }
 
 # ============================================================
@@ -282,7 +318,7 @@ sub _exists {
 sub _factory {
 # ============================================================
 	my $document = shift;
-	my $class    = sprintf( "Simsa::%s", $document->{ class });
+	my $class    = sprintf( "PSF%s", $document->{ class });
 	my $data     = $json->decode( $document->{ data });
 	my $result   = bless { uuid => $document->{ uuid }, class => $document->{ class }, data => $data }, $class;
 
@@ -321,27 +357,19 @@ sub _filter {
 sub _find_references {
 # ============================================================
 	_db_connect();
-	my $mine  = shift;
-	my $refer = shift;
-	my $me    = shift;
+	my $class  = shift;
+	my $column = shift;
+	my $uuid   = shift;
+
+	$class  = uc "\%$class";
+	$column = "gc_$column";
 
 	# ===== SEARCH FOR DIRECT REFERENCES
-	# Things that are mine that refer back to me
-	# (i.e. has-one relationships)
+	# Search generated columns (gc_*) for references
 	my $sth = _prepared_statement( 'references' );
-	$sth->execute( "%$mine", "\$.$refer", $me );
+	$sth->execute({ class => $class, column => $column, uuid => $uuid });
 
 	my $results = [];
-
-	while( my $document = $sth->fetchrow_hashref()) {
-		push @$results, _factory( $document );
-	}
-
-	# ===== SEARCH FOR REFERENCES IN JOIN DOCUMENTS
-	# Joins that refer to me and have things that are mine
-	# (i.e. more complicated relationships, including: many-to-many)
-	my $sth = _prepared_statement( 'joins' );
-	$sth->execute( "\$.$refer", $me, "\$.$mine" );
 
 	while( my $document = $sth->fetchrow_hashref()) {
 		push @$results, _factory( $document );
@@ -388,26 +416,26 @@ sub _prepare_statement {
 # ============================================================
 	my $name = shift;
 	my $sql  = shift;
-	die "System-defined prepared statement named '$name' already exists $!" if exists $Simsa::DBO::statement->{ $name };
+	die "System-defined prepared statement named '$name' already exists $!" if exists $PSF::DBO::statement->{ $name };
 
 	# Return Singleton if exists and defined
-	return $Simsa::DBO::sth->{ $name } if exists $Simsa::DBO::sth->{ $name } && $Simsa::DBO::sth->{ $name };
+	return $PSF::DBO::sth->{ $name } if exists $PSF::DBO::sth->{ $name } && $PSF::DBO::sth->{ $name };
 
 	# Else prepare the statement handle and return
-	return $Simsa::DBO::sth->{ $name } = $Simsa::DBO::dbh->prepare( $sql );
+	return $PSF::DBO::sth->{ $name } = $PSF::DBO::dbh->prepare( $sql );
 }
 
 # ============================================================
 sub _prepared_statement {
 # ============================================================
 	my $name = shift;
-	die "No prepared statement named '$name' $!" unless exists $Simsa::DBO::statement->{ $name };
+	die "No prepared statement named '$name' $!" unless exists $PSF::DBO::statement->{ $name };
 
 	# Return Singleton if exists and defined
-	return $Simsa::DBO::sth->{ $name } if exists $Simsa::DBO::sth->{ $name } && $Simsa::DBO::sth->{ $name };
+	return $PSF::DBO::sth->{ $name } if exists $PSF::DBO::sth->{ $name } && $PSF::DBO::sth->{ $name };
 
 	# Else prepare the statement handle and return
-	return $Simsa::DBO::sth->{ $name } = $Simsa::DBO::dbh->prepare( $Simsa::DBO::statement->{ $name });
+	return $PSF::DBO::sth->{ $name } = $PSF::DBO::dbh->prepare( $PSF::DBO::statement->{ $name });
 }
 
 # ============================================================

@@ -7,11 +7,20 @@ create table document (
 	deleted text default null,
 	created text default current_timestamp,
 	modified text default current_timestamp,
-	seen text default current_timestamp
+
+	/* Generated columns */
+	gc_contestant text generated always as (json_extract( data, '$.contestant' )) stored,
+	gc_match text generated always as (json_extract( data, '$.match' )) stored,
+	gc_round text generated always as (json_extract( data, '$.round' )) stored
+
 );
 
-drop table if exists sessions;
+/* Indices */
+drop index if exists idx_document_class;
+create index idx_document_class on document (class);
 
+/* PHP Sessions */
+drop table if exists sessions;
 create table sessions (
     id text primary key,
     seen int default (strftime( '%s', 'now' )),

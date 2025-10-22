@@ -6,34 +6,119 @@
 - Match
 - Ring
 - Round
+- Score
+  - Update
+  - Status
 
 ## Bracket
+
+    {
+        "round" : [ <Round>, ... ],
+        "match" : [ <Match>, ... ]
+    }
+
+## Clock
+
+    {
+        "start" : <start:timestamp>,
+        "finish" : <finish:timestamp>,
+        "duration" : <seconds:float>,
+        "current" : <seconds:float>
+    }
+
+## ClockChange
+
+    {
+        "clock" : <Clock>,
+        "at" : <seconds:float>,
+        "action" : pause | resume
+    }
 
 ## Contestant
 
     {
-        "id" : <conid>,
-        "name" : <name>,
+        "name" : <name:text>,
         "gender" : f | m,
-        "age" : <age>,
-        "weight" : <weight>,
-        "rank" : <rank>,
+        "age" : <age:int>,
+        "weight" : <weight:float>,
+        "rank" : <rank:text>
+    }
+
+## Division
+
+    {
+        "id" : <divid:text>,
+        "name" : <name:text>,
+        "gender" : f | m | null,
+        "age" : [ <min:int> | null, <max:int> | null ],
+        "weight" : [ <min:float> | null, <max:float> | null ],
+        "rank" : [ <min:text> | null, <max:text> | null ],
+        "round" : [ <Round>, ... ],
+        "contestant" : [ <Contestant>, ... ],
+        "bracket" : <Bracket>
     }
 
 ## Match
 
     {
-        "id" : <mid>,
-        "chung" : {
-            "contestant" : <conid>,
-            "score" : {
-                "presentation" : <presentation>,
-                "technical" : <technical>,
-                "deduction" : <deduction>,
-                "decision" : <decision>,
-            }
-        }
-        "hong" : <conid>
+        "id" : <mid:int>,
+        "ring" : <Ring> | null,
+        "round" : <Round>,
+        "contestant" : [ <Contestant> | null, <Contestant> | null ],
+        "subround" : [ <SubRound>, ... ],
+        "winner" : chung | hong
+    }
+
+## Match::SubRound
+
+    {
+        "number" : <rnum:int>,
+        "clock" : <Clock>,
+        "kyeshi" : <Clock>,
+        "doctor" : <Clock>,
+        "chung" : <Score>,
+        "hong" : <Score>,
+        "winner" : chung | hong,
+        "current" : <current:boolean>,
+    }
+
+## Ring
+
+    {
+        "name" : <name:text>,
+        "number" : <number:int>,
+    }
+
+## Round
+
+    {
+        "name" : <name:text>,
+        "code" : <code:text>,
+        "match" : [ <Match>, ... ],
+    }
+
+## Score::Update
+
+    {
+        "score" : <Score>,
+        "from" : j1 | j2 | j3 | j4 | j5 | co | ap,
+        "presentation" : <presentation:float>,
+        "technical" : <technical:float>,
+        "deduction" : <deduction:float>,
+        "decision" : dsq | wdr
+    }
+
+**co**: Computer Operator
+**ap**: Autopilot
+
+## Score
+
+    {
+        "contestant" : <Contestant> | null (bye),
+        "presentation" : <presentation:float>,
+        "technical" : <technical:float>,
+        "deduction" : <deduction:float>,
+        "decision" : bye | dsq | wdr
     }
 
 There are two scoring methods:
