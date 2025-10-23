@@ -1,32 +1,29 @@
 # Pilsung Fighter Classes
 
 - Bracket
+- Clock
+  - Update
 - Contestant
 - Division
 - Match
+  - Round
 - Ring
 - Round
 - Score
   - Update
-  - Status
-
-## Bracket
-
-    {
-        "round" : [ <Round>, ... ],
-        "match" : [ <Match>, ... ]
-    }
 
 ## Clock
 
     {
+        "name" : <name:text>,
         "start" : <start:timestamp>,
         "finish" : <finish:timestamp>,
         "duration" : <seconds:float>,
-        "current" : <seconds:float>
+        "current" : <seconds:float>,
+        "status" : running | paused
     }
 
-## ClockChange
+## Clock::Update
 
     {
         "clock" : <Clock>,
@@ -49,33 +46,37 @@
     {
         "id" : <divid:text>,
         "name" : <name:text>,
+        "method" : <method:text>,
         "gender" : f | m | null,
         "age" : [ <min:int> | null, <max:int> | null ],
         "weight" : [ <min:float> | null, <max:float> | null ],
-        "rank" : [ <min:text> | null, <max:text> | null ],
-        "round" : [ <Round>, ... ],
+        "rank" : [ <rank:text>, ... ],
         "contestant" : [ <Contestant>, ... ],
-        "bracket" : <Bracket>
+        "round_count" : <count:int>,
+        "round_duration" : <seconds:float>,
+        "rest_duration" : <seconds:float>,
+        "head_contact" : full | light | none
     }
 
 ## Match
 
     {
         "id" : <mid:int>,
+        "division" : <Division>,
         "ring" : <Ring> | null,
         "round" : <Round>,
         "contestant" : [ <Contestant> | null, <Contestant> | null ],
-        "subround" : [ <SubRound>, ... ],
         "winner" : chung | hong
     }
 
-## Match::SubRound
+## Match::Round
 
     {
+        "match" : <Match>,
         "number" : <rnum:int>,
         "clock" : <Clock>,
         "kyeshi" : <Clock>,
-        "doctor" : <Clock>,
+        "medical" : <Clock>,
         "chung" : <Score>,
         "hong" : <Score>,
         "winner" : chung | hong,
@@ -94,22 +95,14 @@
     {
         "name" : <name:text>,
         "code" : <code:text>,
-        "match" : [ <Match>, ... ],
+        "division" : <Division>
     }
 
-## Score::Update
+External references
 
-    {
-        "score" : <Score>,
-        "from" : j1 | j2 | j3 | j4 | j5 | co | ap,
-        "presentation" : <presentation:float>,
-        "technical" : <technical:float>,
-        "deduction" : <deduction:float>,
-        "decision" : dsq | wdr
-    }
-
-**co**: Computer Operator
-**ap**: Autopilot
+- Bracket
+- Division
+- Match
 
 ## Score
 
@@ -118,8 +111,24 @@
         "presentation" : <presentation:float>,
         "technical" : <technical:float>,
         "deduction" : <deduction:float>,
-        "decision" : bye | dsq | wdr
+        "decision" : bye | dsq | wdr | null
     }
+
+## Score::Update
+
+    {
+        "score" : <Score>,
+        "from" : j1 | j2 | j3 | j4 | j5 | co | ap,
+        "to" : chung | hong,
+        "presentation" : <presentation:float>,
+        "technical" : <technical:float>,
+        "deduction" : <deduction:float>,
+        "decision" : dsq | wdr | clear | null,
+        "complete" : <complete:boolean>
+    }
+
+**co**: Computer Operator
+**ap**: Autopilot
 
 There are two scoring methods:
 

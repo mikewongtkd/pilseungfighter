@@ -8,6 +8,7 @@ use DBI;
 use JSON::XS;
 use Lingua::EN::Inflexion qw( noun verb );
 use List::Util qw( any all );
+use Scalar::Util qw( looks_like_number );
 use UUID;
 use vars '$AUTOLOAD';
 
@@ -84,6 +85,18 @@ sub defaults {
 }
 
 # ============================================================
+sub delete {
+# ============================================================
+	my $self = shift;
+	my $uuid = $self->uuid();
+	_db_connect();
+
+	my $sth = _prepared_statement( 'delete' );
+
+	$sth->execute( $uuid );
+}
+
+# ============================================================
 sub document {
 # ============================================================
 	my $self   = shift;
@@ -98,6 +111,17 @@ sub document {
 	$clone->{ uuid } = $uuid; # Add UUID back in prior to writing to DB
 
 	return $clone;
+}
+
+# ============================================================
+sub first {
+# ============================================================
+# \brief Searches the database and return the first document entry 
+# where the entry matches the given criteria
+# ------------------------------------------------------------
+	my $class = _class( shift );
+	my @rows  = $class->search( @_ );
+	return $rows[ 0 ];
 }
 
 # ============================================================
@@ -157,8 +181,8 @@ sub get {
 	# External references are provided by documents that have the current class
 	# as a field
 	} else {
-		my $docs       = $query;
-		my $column     = lc _field( ref $self );
+		my $docs       = _class( $query );
+		my $column     = _field( ref $self );
 		my $uuid       = $self->uuid();
 		my $references = _find_references( $docs, $column, $uuid );
 		my @allowed    = qw( bracket contestant match ring round update chung hong );
@@ -184,24 +208,71 @@ sub get {
 # ============================================================
 sub search {
 # ============================================================
-# \brief Searches the database and return all document entry 
-# UUIDs where the entry matches the given criteria
-# \example PSF::Match->search( divid => 'xyz', matchid => 'abc' );
+# \brief Searches the database and return all document entries 
+# where the entry matches the given criteria
 # ------------------------------------------------------------
 	my $class = _class( shift );
-	my %query = @_;
+	my $where = shift;
+	my $query = shift;
+
+	die "Malformed query for $AUTOLOAD (use: where => { ... } instead) $!" unless $where eq 'where';
+
 	_db_connect();
 
 	my $sql    = 'select uuid, ';
-	my @select = map { "json_extract( data, \"\$.$_\" ) as $_" } keys %query;
+	my @select = map { "json_extract( data, \"\$.$_\" ) as $_" } keys %$query;
 
 	$sql .= join( ', ', @select );
 
-	my @where  = map { "$_ like ?" } keys %query;
+	my @where = ();
+	my $np    = {}; # Named Placeholders
+	foreach my $key (keys %$query) {
+		my $value = $query->{ $key };
+		if( ref( $value ) eq 'ARRAY' ) {
+
+			# Min, max bounds
+			if( int( @$value ) == 2 && all { looks_like_number( $_ ) } @$value ) {
+				my $min = sprintf( ":%s_min", $key );
+				my $max = sprintf( ":%s_max", $key );
+				push @where, "$key >= :min_$key and $key <= :max_$key";
+				$np->{ $min } = $value->[ 0 ];
+				$np->{ $max } = $value->[ 1 ];
+
+			# List of acceptable values
+			} else {
+				my $list = sprintf( ":%s_list", $key );
+				push @where, "$key in ($list)";
+				my @values = ();
+				foreach my $val (@$value) {
+					if( looks_like_number( $val )) {
+						push @values, $val;
+
+					} elsif( ref( $val )) {
+						my $uuid = _uuid( $val );
+						push @values, $uuid ? $uuid : $val;
+
+					} else {
+						push @values, "\"$val\"";
+					}
+				}
+				$np->{ $list } = join( ',', @values );
+			}
+
+		} elsif( ref( $value )) {
+			push @where, "$key like \:$key";
+			my $uuid = _uuid( $value );
+			$value = $uuid ? $uuid : $value;
+			$np->{ $key } = "\%$value\%";
+
+		} else {
+			push @where, "$key like \:$key";
+			$np->{ $key } = "\%$value\%";
+		}
+	}
 
 	$sql .= ' from document where class="' . $class . '" and ' . join( ' and ', @where ) . ' and deleted is null';
 	my $sth = $PSF::DBO::dbh->prepare( $sql );
-	$sth->execute( values %query );
+	$sth->execute( $np );
 	my @rows = ();
 	while( my $row = $sth->fetchrow_hashref()) {
 		my $uuid = $row->{ uuid };
@@ -221,10 +292,27 @@ sub set {
 
 	$key = noun( $key )->is_plural ? noun( $key )->singular : $key;
 
-	if((! $ref) || $ref eq 'HASH' || $ref eq 'ARRAY' ) {
+	if((! $ref)) {
 		$self->{ data }{ $key } = $value;
-	} elsif( $value->can( 'uuid' )) {
+
+	# Prune hashref
+	} elsif( $ref eq 'HASH' ) {
+		my $pruned = {};
+		foreach my $key (keys %$value) {
+			my $uuid = _uuid( $value->{ $key });
+			$pruned->{ $key } = $uuid ? $uuid : $value->{ $key };
+		}
+
+	# Prune arrayref
+	} elsif( $ref eq 'ARRAY' ) {
+		$value = [ map { my $uuid = _uuid( $_ ); $uuid ? $uuid : $_ } @$value ];
+
+	# Prune PSF objects
+	} elsif( $ref && $value->can( 'uuid' )) {
 		$self->{ data }{ $key } = $value->uuid();
+
+	} else {
+		die "Data Integrity Error: Assigning object without UUID to $key $!";
 	}
 	$self->write();
 }
@@ -265,6 +353,7 @@ sub AUTOLOAD {
 	} elsif ( $n == 1 ) {
 		my $value = shift;
 		my $field = _field( $AUTOLOAD );
+
 		$self->set( $field, $value );
 
 	# ===== Two fields; a WHERE clause, and a hashref of conditions
@@ -287,10 +376,12 @@ sub AUTOLOAD {
 # ============================================================
 sub _class {
 # ============================================================
+# \brief Converts string to Perl package notation (sans PSF)
+# ------------------------------------------------------------
 	my $class = shift;
-	my @namespaces = grep { ! /^PSF$/ } split /::/, $class;
+	my @namespaces = map { ucfirst( $_ ) } grep { ! /^PSF$/ } split /(?:::|_)/, $class;
 
-	$class = join( '', @namespaces );
+	$class = join( '::', @namespaces );
 	return $class;
 }
 
@@ -328,9 +419,13 @@ sub _factory {
 # ============================================================
 sub _field {
 # ============================================================
+# \brief Converts string to snake case, which is SQLite3-safe
+# ------------------------------------------------------------
 	my $field = shift;
-	$field = (split /::/, $field)[ -1 ];
-	return $field;
+	my @namespaces = grep { ! /^PSF$/ } split /::/, $field;
+	my $command = $namespaces[ -1 ];
+	return $command if( $command =~ /^[A-Z]$/ ); # Forward special commands (e.g. DESTROY)
+	return lc join( '_', @namespaces );
 }
 
 # ============================================================
@@ -491,9 +586,21 @@ sub _update {
 # ============================================================
 sub _uuid {
 # ============================================================
+# \brief Returns an object's UUID, or if the object is a UUID,
+# return the UUID, otherwise return undef;
+# ------------------------------------------------------------
 	my $document = shift;
 	return $document if _is_uuid( $document );
-	return $document->uuid();
+
+	if( ref $document eq 'HASH' || ref $document eq 'ARRAY' ) {
+		return undef;
+
+	} elsif( ref $document && $document->can( 'uuid' )) {
+		return $document->uuid();
+
+	} else {
+		return undef
+	}
 }
 
 # ============================================================

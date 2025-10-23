@@ -9,9 +9,11 @@ create table document (
 	modified text default current_timestamp,
 
 	/* Generated columns */
+	gc_clock      text generated always as (json_extract( data, '$.clock' ))      stored,
 	gc_contestant text generated always as (json_extract( data, '$.contestant' )) stored,
-	gc_match text generated always as (json_extract( data, '$.match' )) stored,
-	gc_round text generated always as (json_extract( data, '$.round' )) stored
+	gc_match      text generated always as (json_extract( data, '$.match' ))      stored,
+	gc_round      text generated always as (json_extract( data, '$.round' ))      stored,
+	gc_score      text generated always as (json_extract( data, '$.score' ))      stored
 
 );
 
