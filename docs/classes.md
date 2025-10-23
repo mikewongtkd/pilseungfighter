@@ -20,7 +20,7 @@
         "finish" : <finish:timestamp>,
         "duration" : <seconds:float>,
         "current" : <seconds:float>,
-        "status" : running | paused
+        "status" : ready | running | paused | expired
     }
 
 ## Clock::Update
@@ -58,6 +58,16 @@
         "head_contact" : full | light | none
     }
 
+## Division::Round
+
+    {
+        "name" : <name:text>,
+        "code" : <code:text>,
+        "order" : <order:int>,
+        "division" : <Division>,
+        "contestant" : [ <Contestant> ];
+    }
+
 ## Match
 
     {
@@ -88,14 +98,6 @@
     {
         "name" : <name:text>,
         "number" : <number:int>,
-    }
-
-## Round
-
-    {
-        "name" : <name:text>,
-        "code" : <code:text>,
-        "division" : <Division>
     }
 
 External references

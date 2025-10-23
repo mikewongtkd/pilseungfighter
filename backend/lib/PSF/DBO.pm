@@ -20,6 +20,7 @@ our $statement = {
 	exists     => 'select count(*) > 0 from document where uuid=? and deleted is null',
 	get        => 'select * from document where uuid=? and deleted is null',
 	insert     => 'insert into document (uuid, class, data) values (?, ?, ?)',
+	now        => "update document json_set( data, ?, datetime( 'now' )) where uuid = ? and deleted is null",
 	references => "select * from document where upper( class ) like :class and case when :column = :uuid or :column like '[%:uuid%]' and deleted is null",
 	restore    => 'update document set deleted = null where uuid=? and deleted is not null',
 	update     => "update document set data=?, modified = datetime( 'now' ) where uuid=?"
@@ -203,6 +204,18 @@ sub get {
 	}
 
 	return undef;
+}
+
+# ============================================================
+sub now {
+# ============================================================
+	my $self  = shift;
+	my $field = shift;
+
+	_db_connect();
+
+	my $sth = _prepared_statement( 'now' );
+	$sth->execute( "\$.$field", $self->uuid() );
 }
 
 # ============================================================

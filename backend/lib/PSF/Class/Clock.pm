@@ -8,5 +8,40 @@ our $defaults = {
 	finish   => undef,
 	duration => undef,
 	current  => undef,
-	status   => 'paused'
+	status   => 'ready'
 };
+
+# ============================================================
+sub delete {
+# ============================================================
+	my $self = shift;
+
+	$_->delete() foreach $self->clock_updates();
+	$self->SUPER::delete();
+}
+
+# ============================================================
+sub finish {
+# ============================================================
+	my $self   = shift;
+	my $finish = $self->SUPER::finish();
+
+	if( $finish ) {
+		return $finish;
+	} else {
+		$self->now( 'finish' );
+	}
+}
+
+# ============================================================
+sub start {
+# ============================================================
+	my $self  = shift;
+	my $start = $self->SUPER::start();
+
+	if( $start ) {
+		return $start;
+	} else {
+		$self->now( 'start' );
+	}
+}

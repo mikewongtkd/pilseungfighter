@@ -1,12 +1,9 @@
 package PSF::Class::Match::Round;
 use lib qw( /usr/local/psf/lib );
 our $defaults = {
-	id         => undef,
-	division   => undef,
-	ring       => undef,
-	round      => undef,
-	contestant => [],
-	winner     => undef
+	name     => undef,
+	code     => undef,
+	division => undef
 };
 
 use PSF::Class::Clock;
