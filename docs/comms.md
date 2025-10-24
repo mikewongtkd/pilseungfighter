@@ -37,7 +37,11 @@ One notable exception is server pings to gauge client connection strength.
 
 #### Division Read
 
+    "action" : "read",
+
 #### Division Delete
+
+    "action" : "delete",
 
 #### Division Add Contestant
 
@@ -75,6 +79,8 @@ A minimal request template is shown below. Requests are based on the minimal tem
 #### Match Score
 
     "action" : "score",
-    "contestant" : chung | hong
+    "contestant" : chung | hong,
+    "presentation" : -0.1 | 0.1,
+    "technical" : 0.1 | 0.2 | 0.3,
     "presentation" : -0.1 | 0.1
 

@@ -118,20 +118,20 @@ External references
         "presentation" : <presentation:float>,
         "technical" : <technical:float>,
         "deduction" : <deduction:float>,
-        "decision" : bye | dsq | wdr | null
+        "penalty_timer" : <Clock>,
+        "decision" : bye | dsq | wdr | rsc | null
     }
 
 ## Score::Update
 
     {
         "score" : <Score>,
-        "from" : j1 | j2 | j3 | j4 | j5 | co | ap,
+        "from" : j1 | j2 | j3 | j4 | j5 | co | pc,
         "to" : chung | hong,
         "presentation" : <presentation:float>,
         "technical" : <technical:float>,
         "deduction" : <deduction:float>,
-        "decision" : dsq | wdr | clear | null,
-        "complete" : <complete:boolean>
+        "decision" : dsq | wdr | rsc | clear | null
     }
 
 **co**: Computer Operator

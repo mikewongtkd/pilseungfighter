@@ -1,17 +1,16 @@
 package PSF::Class::Score;
 use lib qw( /usr/local/psf/lib );
+use base qw( PSF::DBO );
 our $defaults = {
 	contestant   => undef,
 	presentation => 8.0,
 	technical    => 0.0,
 	deduction    => 0.0,
-	decision     => undef,
-	complete     => 0
+	decision     => undef
 };
 
 use PSF::Class::Score::Update;
 
-use base qw( PSF::DBO );
 
 # ============================================================
 sub delete {

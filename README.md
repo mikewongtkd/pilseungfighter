@@ -113,7 +113,7 @@ In the cutoff method, contestants progress through one or more rounds of fightin
 | Semi-Finals | 9 to 19     | Top 8        |
 | Preliminary | 20 or more  | Top half     |
 
-For the first round, contestants are ranked by seeding (if available) and the bracket and matches are built accordingly. That is, the highest seed fights the lowest seed (or gets a bye), and the 2nd highest seed fights the 2nd lowest seed, and so on. Thereafter, the contestant ranking establishes subsequent round seeding order and the bracket and matches are built accordingly.
+For the first round, contestants are ranked by seeding (if available) and the bracket and matches are built accordingly. That is, the highest seed fights the lowest seed (or gets a bye), and the 2nd highest seed fights the 2nd lowest seed, and so on. If there are an odd number of contestants, then contestant after the middle seed fights twice: once with the contestant before the middle seed, and the contestant with the middle seed. If a contestant fights more than once in any round, that contestant's score is the average of all their matches. Thereafter, the contestant ranking establishes subsequent round seeding order and the bracket and matches are built accordingly.
 
 At the end of each round, contestants are ranked according to their performance in their match for that round:
 

@@ -55,7 +55,8 @@ sub build_bracket {
 
 	my $round = $division->add_round( @{$template}{ qw( order code name )});
 
-	push @contestants, undef if( $n % 2 == 1 );
+	my $half = int(( $n + 1 )/ 2 );
+	splice @contestants, $half, 0, $contestants[ $half ] if( $n % 2 == 1 );
 
 	while( @contestants ) {
 		my $chung = shift @contestants;
@@ -140,6 +141,9 @@ sub rank_contestants {
 		elsif( $a->{ wdr } && $b->{ wdr }) { return  0 }
 		elsif( $a->{ wdr })                { return  1 }
 		elsif( $b->{ wdr })                { return -1 }
+		elsif( $a->{ rsc } && $b->{ rsc }) { return  0 }
+		elsif( $a->{ rsc })                { return  1 }
+		elsif( $b->{ rsc })                { return -1 }
 		else { return $b->{ presentation } <=> $a->{ presentation } || $b->{ win } <=> $a->{ win } || $b->{ technical } <=> $a->{ technical } || $a->{ deduction } <=> $b->{ deduction }; }
 	} @$criteria;
 
