@@ -1,6 +1,5 @@
 package PSF::Class::Contestant;
 use lib qw( /usr/local/psf/lib );
-
 use base qw( PSF::DBO );
 our $defaults = {
 	name   => undef,

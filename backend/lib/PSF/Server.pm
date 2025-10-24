@@ -17,6 +17,11 @@ use Mojo::IOLoop::Delay;
 use PSF::Config;
 use PSF::Client::Registry;
 use PSF::Server::Comms;
+use PSF::Server::Comms::Tournament;
+use PSF::Server::Comms::Division;
+use PSF::Server::Comms::Match;
+use PSF::Server::Comms::Client;
+use PSF::Server::Comms::Server;
 
 our $DEBUG = 1;
 
@@ -37,20 +42,21 @@ sub init {
 	$self->{ _registery }  = new PSF::Client::Registry();
 	$self->{ _comms }      = new PSF::Server::Comms( $self );
 	$self->{ _json }       = (new JSON::XS())->boolean_values( 0, 1 );
-	$self->{ match }       = {
-		read               => \&handle_match_read,
-		score              => \&handle_match_score,
-		update             => \&handle_match_update,
-		write              => \&handle_match_write,
-	};
-	$self->{ ring }        = {
-		read               => \&handle_ring_read,
-		update             => \&handle_ring_update,
-	};
-	$self->{ tournament } = {
-		read               => \&handle_tournament_read,
-	};
-	$self->init_client_server();
+	$self->{ match }       = new PSF::Server::Comms::Match();
+	# 	read               => \&handle_match_read,
+	# 	score              => \&handle_match_score,
+	# 	update             => \&handle_match_update,
+	# 	write              => \&handle_match_write,
+	$self->{ ring }        = new PSF::Server::Comms::Ring();
+	#	read               => \&handle_ring_read,
+	#	update             => \&handle_ring_update,
+	$self->{ tournament }  = new PSF::Server::Comms::Tournament();
+	#	read               => \&handle_tournament_read,
+	$self->{ client }      = new PSF::Server::Comms::Client();
+	#	pong               => \&handle_client_pong
+	$self->{ server }      = new PSF::Server::Comms::Server();
+	#	stop_ping          => \&handle_server_stop_ping
+
 }
 
 # ============================================================
@@ -82,18 +88,6 @@ sub send {
 }
 
 # ============================================================
-sub init_client_server {
-# ============================================================
-	$self = shift;
-	$self->{ client } = {
-		pong          => \&handle_client_pong
-	};
-	$self->{ server } = {
-		stop_ping     => \&handle_server_stop_ping
-	};
-}
-
-# ============================================================
 sub client_health_check {
 # ============================================================
 	my $self  = shift;
@@ -115,6 +109,8 @@ sub handle {
 	my $type     = $request->{ type };   $type =~ s/\s+/_/g;
 	my $cid      = $request->{ from };
 	my $client   = $self->registry->client( $cid );
+
+	die "Server Error: Subject $type not defined $!" unless exists $self->{ $type };
 
 	my $dispatch = $self->{ $type }{ $action } if exists $self->{ $type } && exists $self->{ $type }{ $action };
 	return $self->$dispatch( $request, $client ) if defined $dispatch;

@@ -19,7 +19,8 @@ our $defaults = {
 	round_count    => 1,
 	round_duration => 20,
 	rest_duration  => undef,
-	head_contact   => 'none'
+	head_contact   => 'none',
+	notes          => undef
 };
 
 # ============================================================
@@ -74,9 +75,11 @@ sub build_bracket {
 
 	if(      $method eq 'cutoff' ) {
 		$method = new PSF::Class::Division::Cutoff( $self );
+		$self->round_count( 1 );
 
 	} elsif( $method eq 'se' ) {
 		$method = new PSF::Class::Division::SingleElimination( $self );
+		$self->round_count( 3 );
 	}
 
 	$method->build_bracket();

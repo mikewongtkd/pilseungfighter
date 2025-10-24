@@ -56,7 +56,8 @@
         "round_count" : <count:int>,
         "round_duration" : <seconds:float>,
         "rest_duration" : <seconds:float>,
-        "head_contact" : full | light | none
+        "head_contact" : full | light | none,
+        "notes" : <notes:text>
     }
 
 ## Division::Round
@@ -66,18 +67,21 @@
         "code" : <code:text>,
         "order" : <order:int>,
         "division" : <Division>,
-        "contestant" : [ <Contestant> ];
+        "contestant" : [ <Contestant> ]
     }
 
 ## Match
 
     {
         "id" : <mid:int>,
+        "number" : <number:int>,
         "division" : <Division>,
         "ring" : <Ring> | null,
         "round" : <Round>,
         "contestant" : [ <Contestant> | null, <Contestant> | null ],
-        "winner" : chung | hong
+        "winner" : chung | hong,
+        "start" : <start:timestamp> | null,
+        "finish" : <finish:timestamp> | null,
     }
 
 ## Match::Round

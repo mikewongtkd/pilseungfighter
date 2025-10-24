@@ -207,6 +207,16 @@ sub get {
 }
 
 # ============================================================
+sub json {
+# ============================================================
+	my $self     = shift;
+	my $json     = new JSON::XS();
+	my $document = $self->document();
+
+	return $json->canonical->encode( $document );
+}
+
+# ============================================================
 sub now {
 # ============================================================
 	my $self  = shift;
@@ -389,10 +399,10 @@ sub AUTOLOAD {
 # ============================================================
 sub _class {
 # ============================================================
-# \brief Converts string to Perl package notation (sans PSF)
+# \brief Converts string to Perl package notation (sans PSF::Class)
 # ------------------------------------------------------------
 	my $class = shift;
-	my @namespaces = map { ucfirst( $_ ) } grep { ! /^PSF$/ } split /(?:::|_)/, $class;
+	my @namespaces = map { ucfirst( $_ ) } grep { ! /^(?:PSF|Class)$/ } split /(?:::|_)/, $class;
 
 	$class = join( '::', @namespaces );
 	return $class;
@@ -422,7 +432,7 @@ sub _exists {
 sub _factory {
 # ============================================================
 	my $document = shift;
-	my $class    = sprintf( "PSF%s", $document->{ class });
+	my $class    = sprintf( "PSF::Class::%s", $document->{ class });
 	my $data     = $json->decode( $document->{ data });
 	my $result   = bless { uuid => $document->{ uuid }, class => $document->{ class }, data => $data }, $class;
 
@@ -435,7 +445,7 @@ sub _field {
 # \brief Converts string to snake case, which is SQLite3-safe
 # ------------------------------------------------------------
 	my $field = shift;
-	my @namespaces = grep { ! /^PSF$/ } split /::/, $field;
+	my @namespaces = grep { ! /^(?:PSF|Class)$/ } split /::/, $field;
 	my $command = $namespaces[ -1 ];
 	return $command if( $command =~ /^[A-Z]$/ ); # Forward special commands (e.g. DESTROY)
 	return lc join( '_', @namespaces );
