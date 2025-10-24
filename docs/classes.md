@@ -28,7 +28,7 @@
     {
         "clock" : <Clock>,
         "at" : <seconds:float>,
-        "action" : pause | resume
+        "action" : start | pause | resume | reset
     }
 
 ## Contestant
@@ -38,7 +38,8 @@
         "gender" : f | m,
         "age" : <age:int>,
         "weight" : <weight:float>,
-        "rank" : <rank:text>
+        "rank" : <rank:text>,
+        "seed" : <seed:float>
     }
 
 ## Division

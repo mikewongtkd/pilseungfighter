@@ -1,5 +1,6 @@
 package PSF::Class::Division::SingleElimination;
 
+use List::Util qw( shuffle );
 use POSIX qw( ceil );
 
 # ============================================================
@@ -21,11 +22,11 @@ sub init {
 }
 
 # ============================================================
-sub bracket {
+sub build_bracket {
 # ============================================================
 	my $self        = shift;
 	my $division    = $self->{ division }
-	my @contestants = $division->contestants();
+	my @contestants = sort { $b->seed() cmp $a->seed() } shuffle $division->contestants();
 	my $n           = int( @contestants );
 	return () if $n == 0;
 

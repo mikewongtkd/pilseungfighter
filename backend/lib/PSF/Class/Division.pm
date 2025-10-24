@@ -67,7 +67,7 @@ sub add_round {
 }
 
 # ============================================================
-sub bracket {
+sub build_bracket {
 # ============================================================
 	my $self   = shift;
 	my $method = $self->method();
@@ -79,7 +79,7 @@ sub bracket {
 		$method = new PSF::Class::Division::SingleElimination( $self );
 	}
 
-	$method->bracket();
+	$method->build_bracket();
 }
 
 # ============================================================

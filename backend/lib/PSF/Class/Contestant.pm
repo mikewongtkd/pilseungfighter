@@ -7,7 +7,8 @@ our $defaults = {
 	gender => undef,
 	age    => undef,
 	weight => undef,
-	rank   => 'black'
+	rank   => 'black',
+	seed   => 0.0
 };
 
 # ============================================================

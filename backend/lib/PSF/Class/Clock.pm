@@ -1,7 +1,8 @@
 package PSF::Class::Clock;
 use lib qw( /usr/local/psf/lib );
-
 use base qw( PSF::DBO );
+use PSF::Class::Clock::Update;
+
 our $defaults = {
 	name     => undef,
 	start    => undef,
@@ -10,6 +11,37 @@ our $defaults = {
 	current  => undef,
 	status   => 'ready'
 };
+
+# ============================================================
+sub add_update {
+# ============================================================
+	my $self   = shift;
+	my $action = shift;
+	my $update = new PSF::Class::Clock::Update( 
+		clock  => $self, 
+		at     => $self->current(), 
+		action => $action 
+	);
+
+	my $status = $self->status();
+
+	if(      $status eq 'ready' && $action eq 'start' ) {
+		$self->status( 'running' );
+		$self->now( 'start' );
+
+	} elsif( $status eq 'paused' && $action eq 'resume' ) {
+		$self->status( 'running' );
+
+	} elsif( $status eq 'running' && $action eq 'pause' ) {
+		$self->status( 'paused' );
+
+	} elsif(( $status eq 'paused' || $status eq 'expired' ) && $action eq 'reset' ) {
+		$self->status( 'ready' );
+		$self->current( $self->duration() );
+		$self->start( undef );
+	}
+	return $update
+}
 
 # ============================================================
 sub delete {
@@ -45,3 +77,5 @@ sub start {
 		$self->now( 'start' );
 	}
 }
+
+1;
