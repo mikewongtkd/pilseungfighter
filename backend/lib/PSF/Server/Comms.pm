@@ -28,14 +28,22 @@ sub server {
 # ============================================================
 sub client {
 # ============================================================
-	
+ 	my $self      = shift;
+	my $response  = shift;
+	my $request   = $response->{ request };
+	my $cid       = $request->{ from };
+	my $client    = $self->server->registry->client( $cid );
+	my $cstatus   = $client->status();
+
+	print STDERR "  Sending division information (message ID: $mid) to:\n" if $DEBUG;
+	printf STDERR "    %-17s  %s  %s\n", $cstatus->{ role }, $cstatus->{ cid }, $cstatus->{ health } if $DEBUG;
+
+	$cleint->send({ json => $response });
 }
 
 # ============================================================
 sub group {
 # ============================================================
-# Broadcasts updated division information to the ring
-# ------------------------------------------------------------
  	my $self      = shift;
 	my $response  = shift;
 	my $request   = $response->{ request };
@@ -55,7 +63,6 @@ sub group {
 
 	foreach my $client ($group->clients()) {
 		my $now       = (new Date::Manip::Date( 'now GMT' ))->printf( '%O' ) . 'Z';
-		my $response  = { type => $request->{ type }, action => 'update', digest => $digest, time => $now, division => $unblessed, request => $request, users => $status };
 		my $cstatus   = $client->status();
 		printf STDERR "    %-17s  %s  %s\n", $cstatus->{ role }, $cstatus->{ cid }, $cstatus->{ health } if $DEBUG;
 		$client->send( { json => $response });

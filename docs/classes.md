@@ -18,8 +18,8 @@
         "name" : <name:text>,
         "start" : <start:timestamp>,
         "finish" : <finish:timestamp>,
-        "duration" : <seconds:float>,
-        "current" : <seconds:float>,
+        "duration" : <seconds:float> | null,
+        "current" : <seconds:float> | null,
         "status" : ready | running | paused | expired
     }
 
@@ -53,6 +53,7 @@
         "weight" : [ <min:float> | null, <max:float> | null ],
         "rank" : [ <rank:text>, ... ],
         "contestant" : [ <Contestant>, ... ],
+        "pss" : <pss:boolean>,
         "round_count" : <count:int>,
         "round_duration" : <seconds:float>,
         "rest_duration" : <seconds:float>,
@@ -126,7 +127,7 @@ External references
 
     {
         "score" : <Score>,
-        "from" : j1 | j2 | j3 | j4 | j5 | co | pc,
+        "from" : j1 | j2 | j3 | j4 | j5 | co | pt,
         "to" : chung | hong,
         "presentation" : <presentation:float>,
         "technical" : <technical:float>,

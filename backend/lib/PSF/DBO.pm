@@ -104,12 +104,12 @@ sub document {
 	my $clone  = $self->clone();
 	my $uuid   = $clone->uuid();
 
-	delete $clone->{ uuid }; # Remove UUID prior to pruning
+	delete $clone->{ uuid }; # Remove UUID prior to pruning so pruning doesn't shortcut and just return the object's UUID and no other information
 	
 	$clone = unbless( $clone );
 	$clone = _prune( $clone );
 
-	$clone->{ uuid } = $uuid; # Add UUID back in prior to writing to DB
+	$clone->{ uuid } = $uuid; # Add UUID back in
 
 	return $clone;
 }

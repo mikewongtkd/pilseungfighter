@@ -82,5 +82,5 @@ A minimal request template is shown below. Requests are based on the minimal tem
     "contestant" : chung | hong,
     "presentation" : -0.1 | 0.1,
     "technical" : 0.1 | 0.2 | 0.3,
-    "presentation" : -0.1 | 0.1
+    "deduction" : -0.1 | 0.1
 

@@ -28,7 +28,7 @@ sub update {
 	my $update   = shift;
 	my $decision = $update->decision();
 
-	if( $self->complete() && $update ne 'clear' ) {
+	if( $self->decision() && $decision ne 'clear' ) {
 		$update->delete();
 		return;
 	}
@@ -37,14 +37,12 @@ sub update {
 	if( defined( $self->decision())) {
 		if( $decision eq 'clear' ) {
 			$self->decision( undef );
-			$self->complete( 0 );
 		}
 
 	# Apply decision
 	} else {
 		if( $decision ne 'clear' ) {
 			$self->decision( $decision );
-			$self->complete( 1 );
 		}
 	}
 

@@ -74,7 +74,35 @@ Conditions that would improve a judges interest in a contestant include:
 
 The degree to which the judges award presentation points for the above criteria is up to each judge to determine, but generally 0.1 to 0.3 points per second.
 
-Contestants automatically lose points over time for inactivity; these are offset if the judges deem the contestant is being active.
+### Presentation Score Interpretation
+
+At the end of the match, judges may adjust their final presentation score. The score interpretation are as follows:
+
+#### Presentation Score Only (No PSS)
+
+| Score       | 0.0 to 2.0  | 2.1 to 4.0 | 4.1 to 5.0    | 5.1 to 6.0 |
+| ----------- | ----------- | ---------- | ------------- | ---------- |
+| Performance | Very Poor   | Poor       | Below Average | Average    |
+
+| Score       | 6.1 to 7.0 | 7.1 to 8.0 | 8.1 to 9.0 | 9.1 to 9.9   | 10.0    |
+| ----------- | ---------- | ---------- | ---------- | ------------ | ------- |
+| Performance | Good       | Very Good  | Excellent  | Near Perfect | Perfect |
+
+#### Presentation and Technical Score (With PSS)
+
+If the PSS is available, then the presentation score is provided on a 0.0-6.0 scale
+
+| Score       | 0.0 to 1.2  | 1.3 to 2.4 | 2.5 to 3.0    | 3.1 to 3.6 |
+| ----------- | ----------- | ---------- | ------------- | ---------- |
+| Performance | Very Poor   | Poor       | Below Average | Average    |
+
+| Score       | 3.7 to 4.2 | 4.3 to 4.8 | 4.9 to 5.4 | 5.5 to 5.9   | 6.0     |
+| ----------- | ---------- | ---------- | ---------- | ------------ | ------- |
+| Performance | Good       | Very Good  | Excellent  | Near Perfect | Perfect |
+
+### Presentation Score Goes Down Over Time for Inactivity
+
+Since inactivity is the default behavior of contestants and judges can't be expected to all score exactly regularly over time, the scoring system handles deducting points for inactivity. Contestants automatically lose points over time for inactivity at the rate of 4.0 presentation points (2.4 if PSS is available) over the match duration; these are offset if the judges deem the contestant is being active.
 
 ### Deductions
 

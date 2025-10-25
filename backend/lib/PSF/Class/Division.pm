@@ -16,6 +16,7 @@ our $defaults = {
 	weight         => [ undef, undef ],
 	rank           => [],
 	contestant     => [],
+	pss            => 0,
 	round_count    => 1,
 	round_duration => 20,
 	rest_duration  => undef,

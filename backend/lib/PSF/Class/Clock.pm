@@ -60,8 +60,14 @@ sub finish {
 
 	if( $finish ) {
 		return $finish;
-	} else {
+
+	} elsif( $self->status() eq 'running' ) {
+		$self->status( 'expired' );
 		$self->now( 'finish' );
+		return $self->SUPER::finish();
+
+	} else {
+		return undef;
 	}
 }
 
@@ -71,10 +77,16 @@ sub start {
 	my $self  = shift;
 	my $start = $self->SUPER::start();
 
-	if( $start ) {
+	if( defined( $start )) {
 		return $start;
-	} else {
+
+	} elsif( $self->status() eq 'ready' ) {
+		$self->status( 'running' );
 		$self->now( 'start' );
+		return $self->SUPER::start();
+
+	} else {
+		return undef;
 	}
 }
 

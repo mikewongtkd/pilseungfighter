@@ -12,16 +12,15 @@ use Data::Structure::Util qw( unbless );
 use Clone qw( clone );
 use File::Slurp qw( read_file );
 use Encode qw( encode );
-use Mojo::IOLoop;
-use Mojo::IOLoop::Delay;
 use PSF::Config;
 use PSF::Client::Registry;
 use PSF::Server::Comms;
-use PSF::Server::Comms::Tournament;
+use PSF::Server::Comms::Client;
 use PSF::Server::Comms::Division;
 use PSF::Server::Comms::Match;
-use PSF::Server::Comms::Client;
+use PSF::Server::Comms::Ring;
 use PSF::Server::Comms::Server;
+use PSF::Server::Comms::Tournament;
 
 our $DEBUG = 1;
 
@@ -42,20 +41,12 @@ sub init {
 	$self->{ _registery }  = new PSF::Client::Registry();
 	$self->{ _comms }      = new PSF::Server::Comms( $self );
 	$self->{ _json }       = (new JSON::XS())->boolean_values( 0, 1 );
-	$self->{ match }       = new PSF::Server::Comms::Match();
-	# 	read               => \&handle_match_read,
-	# 	score              => \&handle_match_score,
-	# 	update             => \&handle_match_update,
-	# 	write              => \&handle_match_write,
-	$self->{ ring }        = new PSF::Server::Comms::Ring();
-	#	read               => \&handle_ring_read,
-	#	update             => \&handle_ring_update,
-	$self->{ tournament }  = new PSF::Server::Comms::Tournament();
-	#	read               => \&handle_tournament_read,
-	$self->{ client }      = new PSF::Server::Comms::Client();
-	#	pong               => \&handle_client_pong
-	$self->{ server }      = new PSF::Server::Comms::Server();
-	#	stop_ping          => \&handle_server_stop_ping
+	$self->{ client }      = new PSF::Server::Comms::Client( $self );
+	$self->{ division }    = new PSF::Server::Comms::Division( $self );
+	$self->{ match }       = new PSF::Server::Comms::Match( $self );
+	$self->{ ring }        = new PSF::Server::Comms::Ring( $self );
+	$self->{ server }      = new PSF::Server::Comms::Server( $self );
+	$self->{ tournament }  = new PSF::Server::Comms::Tournament( $self );
 
 }
 
@@ -111,88 +102,27 @@ sub handle {
 	my $client   = $self->registry->client( $cid );
 
 	die "Server Error: Subject $type not defined $!" unless exists $self->{ $type };
+	die "Server Error: Subject $type does not implement Server Comms Protocol $!" unless( ref( $self->{ $type }) && $self isa PSF::Server::Comms::Protocol )
 
-	my $dispatch = $self->{ $type }{ $action } if exists $self->{ $type } && exists $self->{ $type }{ $action };
-	return $self->$dispatch( $request, $client ) if defined $dispatch;
-	print STDERR "Unknown request $type, $action\n";
-}
+	my $subject = $self->{ $type };
 
-# ============================================================
-sub handle_client_pong {
-# ============================================================
-	my $self    = shift;
-	my $request = shift;
-	my $client  = shift;
-	my $ping    = $request->{ server }{ ping };
-	my $changed = $client->ping->pong( $ping );
+	die "Server Error: Subject $type cannot implement the requested action $action $!" unless $subject->can( $action );
 
-	# Only broadcast when there is a change of status
-	return unless $changed;
-
-	my $status   = $client->status();
-	my $response = { type => 'users', action => 'update', ring => $ring, status => $status, request => $request };
-	$self->send->group( $response );
-}
-
-# ============================================================
-sub handle_server_stop_ping {
-# ============================================================
- 	my $self      = shift;
-	my $request   = shift;
-	my $client    = shift;
-	my $user      = $client->description();
-
-	print STDERR "$user requests server stop pinging them.\n" if $DEBUG;
-
-	$client->ping->quit();
-
-	my $response = { type => 'users', action => 'update', ring => $ring, request => $request };
-	$self->send->group( $request );
+	return $subject->$action( $request, $client );
 }
 
 # ============================================================
 sub handle_match_update {
 # ============================================================
- 	my $self      = shift;
-	my $request   = shift;
-	my $client    = shift;
-	my $mid       = $request->{ mid };
+ 	my $self    = shift;
+	my $request = shift;
+	my $client  = shift;
+	my $mid     = $request->{ mid };
 
 	print STDERR "$user message.\n" if $DEBUG;
 
 	my $response = { type => 'division', action => 'update', ring => $ring, division => $division, request => $request };
 	$self->send->group( $response );
-}
-
-# ============================================================
-sub autopilot {
-# ============================================================
-#** @method( request, progress, group )
-#   @brief Automatically advances to the next form/athlete/round/division
-#*
-
-	my $self     = shift;
-	my $request  = shift;
-	my $progress = shift;
-	my $group    = shift;
-	my $division = $progress->current();
-	my $cycle    = $division->{ autodisplay } || 2;
-
-	request->{ type } = 'autopilot';
-
-	# ===== ENGAGE AUTOPILOT
-	try {
-		print STDERR "Engaging autopilot.\n" if $DEBUG;
-		$division->autopilot( 'on' );
-		$division->write();
-	} catch {
-		return { error => $_ };
-	};
-
-	my @steps = $division->method->autopilot_steps( $self, $request, $progress, $group );
-	my $delay = new Mojo::IOLoop::Delay();
-	$delay->steps( @steps );
-	$delay->wait();
 }
 
 1;
