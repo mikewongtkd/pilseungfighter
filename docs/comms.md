@@ -14,9 +14,11 @@ One notable exception is server pings to gauge client connection strength.
 
 - subject:
 - action:
-- from: cid *(Automatically supplied by the server)*
-- ring: rnum *(Automatically supplied by the server)*
+- from: &lt;cid&gt; | 0 *(Automatically supplied by the server)*
+- ring: &lt;rnum&gt; *(Automatically supplied by the server)*
 - *other parameters as needed*
+
+If `<cid>` is 0, then the request originates from the server.
 
 ### Responses
 
@@ -84,3 +86,9 @@ A minimal request template is shown below. Requests are based on the minimal tem
     "technical" : 0.1 | 0.2 | 0.3,
     "deduction" : -0.1 | 0.1
 
+#### Match Update Penalty Timer
+
+    "action" : "update penalty timer",
+    "match" : { "uuid" : <UUID> },
+    "contestant" : "chung" | "hong",
+    "timer" : { "action" : "start" | "pause" | "resume" | "reset" }

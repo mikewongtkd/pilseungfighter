@@ -31,7 +31,7 @@ sub client {
  	my $self      = shift;
 	my $response  = shift;
 	my $request   = $response->{ request };
-	my $cid       = $request->{ from };
+	my $cid       = $request->{ from }; die "Comms Error: Cannot have server talk to itself (CID: $cid) $!" unless $cid;
 	my $client    = $self->server->registry->client( $cid );
 	my $cstatus   = $client->status();
 
@@ -48,8 +48,9 @@ sub group {
 	my $response  = shift;
 	my $request   = $response->{ request };
 	my $cid       = $request->{ from };
-	my $client    = $self->server->registry->client( $cid );
-	my $group     = $client->group();
+	my $ring      = $request->{ ring };
+	my $registry  = $self->server->registry();
+	my $group     = defined $cid && $cid == 0 ?  $registry->group( $ring ) : $registry->client( $cid )->group();
 	my $json      = $self->{ _json };
 	my $status    = $group->status();
 	my $division  = defined $request->{ divid } ? $progress->find( $request->{ divid } ) : $progress->current();

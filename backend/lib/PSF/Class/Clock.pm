@@ -15,8 +15,11 @@ our $defaults = {
 # ============================================================
 sub add_update {
 # ============================================================
-	my $self   = shift;
-	my $action = shift;
+	my $self     = shift;
+	my $action   = shift;
+	my $current  = shift;
+	my $duration = shift;
+
 	my $update = new PSF::Class::Clock::Update( 
 		clock  => $self, 
 		at     => $self->current(), 
@@ -24,23 +27,26 @@ sub add_update {
 	);
 
 	my $status = $self->status();
+	my $name   = $self->name();
 
-	if(      $status eq 'ready' && $action eq 'start' ) {
-		$self->status( 'running' );
-		$self->now( 'start' );
-
-	} elsif( $status eq 'paused' && $action eq 'resume' ) {
-		$self->status( 'running' );
-
-	} elsif( $status eq 'running' && $action eq 'pause' ) {
+	if( $action eq 'set' ) {
 		$self->status( 'paused' );
+		$self->current( $current );
+		$self->duration( $duration );
 
-	} elsif(( $status eq 'paused' || $status eq 'expired' ) && $action eq 'reset' ) {
-		$self->status( 'ready' );
-		$self->current( $self->duration() );
-		$self->start( undef );
+		return $self->status();
 	}
-	return $update
+
+	if(    $action eq 'start'  ) { $self->start(); }
+	elsif( $action eq 'resume' ) { $self->resume(); }
+	elsif( $action eq 'pause'  ) { $self->pause(); }
+	elsif( $action eq 'reset'  ) { $self->reset() if( $name eq 'kyeshi' || $name eq 'medical' ); }
+	# The Match Round Clock doesn't reset once expired (instead you're given a
+	# new Match Round Clock for each Match Round). The Penalty Timer counts up
+	# instead of down and therefore never expires. It simply stops when the
+	# Match Round Clock expires.
+
+	return $self->status();
 }
 
 # ============================================================
@@ -56,15 +62,56 @@ sub delete {
 sub finish {
 # ============================================================
 	my $self   = shift;
-	my $finish = $self->SUPER::finish();
+	my $status = $self->status()
 
-	if( $finish ) {
-		return $finish;
-
-	} elsif( $self->status() eq 'running' ) {
+	if( $status eq 'running' ) {
 		$self->status( 'expired' );
 		$self->now( 'finish' );
 		return $self->SUPER::finish();
+
+	} else {
+		return $self->SUPER::finish();
+	}
+}
+
+# ============================================================
+sub pause {
+# ============================================================
+	my $self   = shift;
+	my $status = $self->status();
+
+	if( $status eq 'running' ) {
+		return $self->status( 'paused' );
+
+	} else {
+		return undef;
+	}
+}
+
+# ============================================================
+sub reset {
+# ============================================================
+	my $self   = shift;
+	my $status = $self->status();
+
+	if( $status eq 'paused' || $status eq 'expired' ) {
+		$self->current( $self->duration() );
+		$self->start( undef );
+		return $self->status( 'ready' );
+
+	} else {
+		return undef;
+	}
+}
+
+# ============================================================
+sub resume {
+# ============================================================
+	my $self   = shift;
+	my $status = $self->status();
+
+	if( $status eq 'paused' ) {
+		return $self->status( 'running' );
 
 	} else {
 		return undef;
@@ -74,19 +121,15 @@ sub finish {
 # ============================================================
 sub start {
 # ============================================================
-	my $self  = shift;
-	my $start = $self->SUPER::start();
+	my $self   = shift;
+	my $status = $self->status();
 
-	if( defined( $start )) {
-		return $start;
-
-	} elsif( $self->status() eq 'ready' ) {
-		$self->status( 'running' );
+	if( $status eq 'ready' ) {
 		$self->now( 'start' );
-		return $self->SUPER::start();
+		return $self->status( 'running' );
 
 	} else {
-		return undef;
+		return $self->SUPER::start();
 	}
 }
 

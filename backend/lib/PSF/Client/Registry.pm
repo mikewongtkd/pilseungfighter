@@ -62,6 +62,18 @@ sub clients {
 }
 
 # ============================================================
+sub group {
+# ============================================================
+	my $self  = shift;
+	my $ring  = shift;
+	my $group = new PSF::Client::Group( $ring );
+	my $gid   = $group->id();
+
+	return $self->{ group }{ $gid } if exists $self->{ group }{ $gid };
+	return undef;
+}
+
+# ============================================================
 sub remove {
 # ============================================================
 	my $self       = shift;

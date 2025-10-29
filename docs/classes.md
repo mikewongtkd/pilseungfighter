@@ -28,7 +28,14 @@
     {
         "clock" : <Clock>,
         "at" : <seconds:float>,
-        "action" : start | pause | resume | reset
+        "action" : start | pause | resume | reset | set
+    }
+
+If the update has the action `set`, then the following two parameters are also required.
+
+    {
+        "duration" : <seconds:float> | null,
+        "current" : <seconds:float> | null
     }
 
 ## Contestant
@@ -127,7 +134,7 @@ External references
 
     {
         "score" : <Score>,
-        "from" : j1 | j2 | j3 | j4 | j5 | co | pt,
+        "from" : j1 | j2 | j3 | j4 | j5 | co | 0,
         "to" : chung | hong,
         "presentation" : <presentation:float>,
         "technical" : <technical:float>,

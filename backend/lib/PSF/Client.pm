@@ -5,6 +5,7 @@ use Data::Structure::Util qw( unbless );
 use Digest::SHA1 qw( sha1_hex );
 use JSON::XS;
 use Mojolicious::Controller;
+use PSF::Client::Group;
 use PSF::Client::Ping;
 
 # ============================================================

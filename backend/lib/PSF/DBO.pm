@@ -315,29 +315,9 @@ sub set {
 
 	$key = noun( $key )->is_plural ? noun( $key )->singular : $key;
 
-	if((! $ref)) {
-		$self->{ data }{ $key } = $value;
-
-	# Prune hashref
-	} elsif( $ref eq 'HASH' ) {
-		my $pruned = {};
-		foreach my $key (keys %$value) {
-			my $uuid = _uuid( $value->{ $key });
-			$pruned->{ $key } = $uuid ? $uuid : $value->{ $key };
-		}
-
-	# Prune arrayref
-	} elsif( $ref eq 'ARRAY' ) {
-		$value = [ map { my $uuid = _uuid( $_ ); $uuid ? $uuid : $_ } @$value ];
-
-	# Prune PSF objects
-	} elsif( $ref && $value->can( 'uuid' )) {
-		$self->{ data }{ $key } = $value->uuid();
-
-	} else {
-		die "Data Integrity Error: Assigning object without UUID to $key $!";
-	}
+	$self->{ data }{ $key } = $value;
 	$self->write();
+	return $value;
 }
 
 # ============================================================
@@ -377,7 +357,7 @@ sub AUTOLOAD {
 		my $value = shift;
 		my $field = _field( $AUTOLOAD );
 
-		$self->set( $field, $value );
+		return $self->set( $field, $value );
 
 	# ===== Two fields; a WHERE clause, and a hashref of conditions
 	} elsif( $n == 2 ) {
