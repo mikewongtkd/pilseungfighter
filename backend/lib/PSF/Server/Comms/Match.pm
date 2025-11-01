@@ -100,4 +100,30 @@ sub update_penalty_timer {
 	}
 }
 
+# ============================================================
+sub write {
+# ============================================================
+	my $self  = shift;
+	my $data  = shift;
+	my $uuid  = shift;
+	my $match = undef;
+
+	if( defined $uuid ) {
+		$match = new PSF::Class::Match( $uuid );
+	} else {
+		if( defined $data ) {
+			if( ref $data eq 'HASH' ) {
+			} else {
+				if( ref $data ) {
+					my $json  = new JSON::XS();
+					my $clone = unbless( clone( $data ));
+					$data = $json->canonical->encode( $clone );
+				}
+				die "Request Error: Invalid match data: $data $!";
+			}
+		} else {
+		}
+	}
+}
+
 1;

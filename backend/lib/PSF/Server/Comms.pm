@@ -1,4 +1,8 @@
 package PSF::Server::Comms;
+use PSF::DBO;
+use JSON::XS;
+use Data::Structure::Util qw( unbless );
+use Clone qw( clone );
 
 # ============================================================
 sub new {
@@ -69,6 +73,24 @@ sub group {
 		$client->send( { json => $response });
 	}
 	print STDERR "\n" if $DEBUG;
+}
+
+# ============================================================
+sub stringify {
+# ============================================================
+	my $self  = shift;
+	my $data  = shift;
+	my $json  = new JSON::XS();
+	my $clone = unbless( clone( $data ));
+	my $uuid  = undef;
+
+	if( ref
+	if( exists $data->{ uuid }) {
+		$uuid = $data->{ uuid };
+		delete $data->{ uuid };
+	}
+	PSF::DBO::_prune( $data );
+	$data->{ uuid } = $uuid;
 }
 
 1;
