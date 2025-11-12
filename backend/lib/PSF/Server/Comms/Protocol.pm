@@ -1,4 +1,6 @@
 package PSF::Server::Comms::Protocol;
+use lib qw( /usr/local/psf/lib );
+use Clone qw( clone );
 
 # ============================================================
 sub new {
@@ -19,6 +21,40 @@ sub init {
 }
 
 # ============================================================
+sub first {
+# ============================================================
+	my $self    = shift;
+	my $request = shift;
+
+	my @rows    = $self->_search( $request );
+	return int( @rows ) ? $rows[ 0 ] : undef;
+}
+
+# ============================================================
+sub read {
+# ============================================================
+	my $self    = shift;
+	my $request = shift;
+
+	unless( exists $request->{ uuid }) {
+		die "Response Error: No UUID specified for read request $!";
+	}
+
+	my $instance = $self->_factory( $request );
+	my $response = { request => $request, subject => $subject, $subject => $instance->document() };
+	$self->send->client( $response );
+}
+
+# ============================================================
+sub search {
+# ============================================================
+	my $self    = shift;
+	my $request = shift;
+
+	return $self->_search( $request );
+}
+
+# ============================================================
 sub send {
 # ============================================================
 	my $self = shift;
@@ -30,6 +66,45 @@ sub server {
 # ============================================================
 	my $self = shift;
 	return $self->{ _server };
+}
+
+# ============================================================
+sub write {
+# ============================================================
+	my $self     = shift;
+	my $request  = shift;
+	my $subject  = $self->_subject();
+	my $instance = $self->_factory( $request );
+
+	foreach my $key (keys %$update) {
+		next if $key eq 'uuid';
+		my $value = $args{ $key };
+		$instance->set( $key, $value );
+	}
+
+	my $response = { request => $request, subject => $subject, $subject => $instance->document() };
+	$self->send->group( $response );
+}
+
+# ============================================================
+sub _factory {
+# ============================================================
+	my $self = shift;
+	return undef;
+}
+
+# ============================================================
+sub _search {
+# ============================================================
+	my $self = shift;
+	return ();
+}
+
+# ============================================================
+sub _subject {
+# ============================================================
+	my $self = shift;
+	return undef;
 }
 
 1;

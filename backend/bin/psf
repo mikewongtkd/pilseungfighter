@@ -22,10 +22,10 @@ our $DEBUG    = 0;
 # MANAGE RINGS, DIVISIONS, AND ATHLETES VIA WEBSOCKETS
 # ------------------------------------------------------------
 websocket '/:ring/:role' => sub {
-	my $self    = shift;
-	my $rnum    = $self->param( 'ring' );
-	my $client  = $server->registry->add( $self, $rnum );
-	my $ring    = undef;
+	my $self   = shift;
+	my $rnum   = $self->param( 'ring' );
+	my $client = $server->registry->add( $self, $rnum );
+	my $ring   = undef;
 
 	$self->inactivity_timeout( 3600 ); # 1 hour
 	$client->ping->start();

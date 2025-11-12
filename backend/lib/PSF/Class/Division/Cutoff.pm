@@ -33,12 +33,15 @@ sub advance_contestants {
 }
 
 # ============================================================
-sub build_bracket {
+sub bracket {
 # ============================================================
 	my $self        = shift;
 	my $division    = $self->{ division };
 	my @contestants = sort { $b->seed() cmp $a->seed() } shuffle $division->contestants();
 	my $n           = int( @contestants );
+	my @matches     = $division->matches();
+
+	return @matches if int( @matches ) != 0;
 
 	our @round_template = (
 		{ order => 1, code => 'finals', name => 'Final Round' },
@@ -64,6 +67,8 @@ sub build_bracket {
 
 		$division->add_match( $round, $chung, $hong );
 	}
+
+	return $division->matches();
 }
 
 # ============================================================

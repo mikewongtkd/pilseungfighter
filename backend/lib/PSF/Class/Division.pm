@@ -69,7 +69,7 @@ sub add_round {
 }
 
 # ============================================================
-sub build_bracket {
+sub bracket {
 # ============================================================
 	my $self   = shift;
 	my $method = $self->method();
@@ -83,7 +83,7 @@ sub build_bracket {
 		$self->round_count( 3 );
 	}
 
-	$method->build_bracket();
+	return $method->bracket();
 }
 
 # ============================================================

@@ -73,10 +73,10 @@ sub update_penalty_timer {
  	my $self    = shift;
 	my $request = shift;
 	my $client  = shift;
-	my $uuid    = $request->{ match }{ uuid };
-
-	my $match = new PSF::Class::Match( $uuid );
-	return unless $match->division->method() eq 'cutoff';
+	my $uuid    = $request->{ match }{ uuid }; die "Request Error: No UUID specified for penalty timer update request $!" unless $uuid;
+	my $match   = new PSF::Class::Match( $uuid );
+	my $subject = $self->subject();
+	die "Request Error: UUID $uuid not found for $subject read request $!" unless $match;
 
 	my $duration = $match->division->round_duration();
 	my $color    = $request->{ contestant };
@@ -89,6 +89,7 @@ sub update_penalty_timer {
 	my $action = $request->{ timer }{ action };
 	my $status = $timer->add_update( $action );
 
+<<<<<<< Updated upstream
 	if(      $status eq 'running' ) {
 		my $ptid = $self->start_deductions_over_time( $match, $score, $timer, $color, $rate );
 		$self->penalty_timer( $color, $ptid );
@@ -97,10 +98,53 @@ sub update_penalty_timer {
 		my $ptid = $self->penalty_timer( $color );
 		Mojo::IOLoop->remove( $ptid ) if defined $ptid
 
+=======
+	# ===== GET TIMER RUNNING
+	if(( $status eq 'ready' && $action eq 'start' ) || ( $status eq 'paused' && $action eq 'resume' )) {
+		$timer->status( 'running' );
+		my $ptid = Mojo::IOLoop->recurring( $rate => sub ( $loop ) {
+			my $current = $timer->current();
+			
+			$timer->current( $current - $rate );
+				
+			my $update = new PSF::Class::Score::Update( 
+				score        => $score, 
+				from         => 'pt', 
+				to           => $color, 
+				presentation => -0.1 
+			);
+		});
+		$self->{ $color }{ penalty_timer } = $ptid;
+
+	# ===== STOP TIMER
+	} elsif( $status eq 'running' ) {
+		$timer->status( 'paused' );
+		my $ptid = $self->{ $color }{ penalty_timer };
+		Mojo::IOLoop->remove( $ptid );
+	}
+
+	my $response = { request => $request, subject => $subject, contestant => $color, $subject => $match->document() };
+	$self->send->group( $response );
+}
+
+# ============================================================
+sub _factory {
+# ============================================================
+	my $self    = shift;
+	my $request = shift;
+	my $subject = $self->_subject();
+
+	if( exists $request->{ $subject }{ uuid }) {
+		my $uuid = $request->{ $subject }{ uuid };
+		return new PSF::Class::Match( $uuid );
+	} else {
+		return new PSF::Class::Match();
+>>>>>>> Stashed changes
 	}
 }
 
 # ============================================================
+<<<<<<< Updated upstream
 sub write {
 # ============================================================
 	my $self  = shift;
@@ -124,6 +168,22 @@ sub write {
 		} else {
 		}
 	}
+=======
+sub _search {
+# ============================================================
+	my $self    = shift;
+	my $request = shift;
+	my $subject = $self->_subject();
+
+	return PSF::Class::Match->search( $request->{ $subject });
+}
+
+# ============================================================
+sub _subject {
+# ============================================================
+	my $self = shift;
+	return 'match';
+>>>>>>> Stashed changes
 }
 
 1;

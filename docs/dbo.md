@@ -22,12 +22,16 @@ New objects can be provided values as key-value pairs.
 **Example**
 
     my $contestant = new PSF::Contestant( 
-        name   => 'Jennifer Chu', 
+        name   => 'Jennifer Cho', 
         gender => 'f',
         age    => 12,
         weight => 38.4,
         rank   => 'black 1st dan'
     );
+
+### Setting a value
+
+	$contestant->set( 'name', 'Jennifer Chu' );
 
 ### Searching
 

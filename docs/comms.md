@@ -12,11 +12,60 @@ One notable exception is server pings to gauge client connection strength.
 
 ### Requests
 
+<<<<<<< Updated upstream
 - subject:
 - action:
 - from: &lt;cid&gt; | 0 *(Automatically supplied by the server)*
 - ring: &lt;rnum&gt; *(Automatically supplied by the server)*
 - *other parameters as needed*
+=======
+	{
+		"subject" : contestant | division | match | ring | round,
+		"action" : read | write | delete | <subject action>,
+		"from" : <cid>, 
+		"ring" : <rnum>
+		...
+	}
+
+The fields`from` and `ring` are automatically supplied by the server. Server-sent requests have CID = 0 and the ring is set depending on circumstances.
+
+#### Universal Requests
+
+All PSF objects respond to the following requests
+
+##### Create/Update
+
+Creates or updates a PSF object, as specified in `PSF::Server::Comms::Protocol`, which is the base class for all Comms classes.
+
+	"action" : "write",
+	<subject> : { <subject parameters> }
+
+If `uuid` is not one of the `<subject parameters>`, then a new PSF object shall be created. Otherwise, the specified PSF object will be updated using the `<subject parameters>`.
+
+##### Delete
+
+	"action" : "delete",
+	<subject> : <uuid>
+
+##### First
+
+Retrieves one PSF object matching the specified parameters. Returns one object. If no object matches the criteria, then returns `null`.
+
+	"action" : "get one",
+	<subject> : <subject parameters>
+
+##### Read
+
+	"action" : "read",
+	<subject> : <uuid>
+
+##### Search
+
+Retrieves one or more PSF objects matching the specified parameters. Returns an array of objects, an array with a single object, or an empty array.
+
+	"action" : "get",
+	<subject> : <subject parameters>
+>>>>>>> Stashed changes
 
 If `<cid>` is 0, then the request originates from the server.
 
@@ -24,26 +73,11 @@ If `<cid>` is 0, then the request originates from the server.
 
     {
         "request": <request>
-        "subject": bracket | contestant | division | match | ring | round,
+        "subject": contestant | division | match | ring | round,
         <subject>
     }
 
-## Subjects
-
 ### Division
-
-#### Division Create/Update
-
-    "action" : "write",
-    "division" : { <division parameters> }
-
-#### Division Read
-
-    "action" : "read",
-
-#### Division Delete
-
-    "action" : "delete",
 
 #### Division Add Contestant
 
@@ -69,15 +103,6 @@ A minimal request template is shown below. Requests are based on the minimal tem
         "action": <action>
     }
 
-#### Match Create/Update
-
-    "action" : "write",
-    "match" : { <match parameters> }
-
-#### Match Read
-
-    "action" : "read"
-
 #### Match Score
 
     "action" : "score",
@@ -87,8 +112,11 @@ A minimal request template is shown below. Requests are based on the minimal tem
     "deduction" : -0.1 | 0.1
 
 #### Match Update Penalty Timer
+<<<<<<< Updated upstream
 
     "action" : "update penalty timer",
     "match" : { "uuid" : <UUID> },
     "contestant" : "chung" | "hong",
     "timer" : { "action" : "start" | "pause" | "resume" | "reset" }
+=======
+>>>>>>> Stashed changes

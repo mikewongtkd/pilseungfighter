@@ -1,6 +1,5 @@
 # Pilsung Fighter Classes
 
-- Bracket
 - Clock
   - Update
 - Contestant
@@ -115,7 +114,6 @@ If the update has the action `set`, then the following two parameters are also r
 
 External references
 
-- Bracket
 - Division
 - Match
 
