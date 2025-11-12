@@ -12,13 +12,6 @@ One notable exception is server pings to gauge client connection strength.
 
 ### Requests
 
-<<<<<<< Updated upstream
-- subject:
-- action:
-- from: &lt;cid&gt; | 0 *(Automatically supplied by the server)*
-- ring: &lt;rnum&gt; *(Automatically supplied by the server)*
-- *other parameters as needed*
-=======
 	{
 		"subject" : contestant | division | match | ring | round,
 		"action" : read | write | delete | <subject action>,
@@ -65,7 +58,6 @@ Retrieves one or more PSF objects matching the specified parameters. Returns an 
 
 	"action" : "get",
 	<subject> : <subject parameters>
->>>>>>> Stashed changes
 
 If `<cid>` is 0, then the request originates from the server.
 
@@ -112,11 +104,8 @@ A minimal request template is shown below. Requests are based on the minimal tem
     "deduction" : -0.1 | 0.1
 
 #### Match Update Penalty Timer
-<<<<<<< Updated upstream
 
     "action" : "update penalty timer",
     "match" : { "uuid" : <UUID> },
     "contestant" : "chung" | "hong",
     "timer" : { "action" : "start" | "pause" | "resume" | "reset" }
-=======
->>>>>>> Stashed changes
