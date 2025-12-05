@@ -1,22 +1,17 @@
 #! /usr/bin/perl
 
 use lib qw( /usr/local/psf/lib );
-use Mojolicious::Lite;
-use Mojo::IOLoop::Delay;
-use Try::Tiny;
-use PSF::Server;
-use PHP::Session;
-use JSON::XS;
 use Digest::SHA1 qw( sha1_hex );
-use List::MoreUtils (qw( first_index ));
-use MIME::Base64 qw( encode_base64 decode_base64 );
 use Data::Dumper;
-use Clone qw( clone );
 use EV;
+use JSON::XS;
+use Mojolicious::Lite;
+use PSF::Server;
+use Try::Tiny;
 
-our $json     = (new JSON::XS())->boolean_values( 0, 1 );
-our $server   = new PSF::Server();
-our $DEBUG    = 0;
+our $json   = (new JSON::XS())->boolean_values( 0, 1 );
+our $server = new PSF::Server();
+our $DEBUG  = 0;
 
 # ------------------------------------------------------------
 # MANAGE RINGS, DIVISIONS, AND ATHLETES VIA WEBSOCKETS
@@ -24,8 +19,7 @@ our $DEBUG    = 0;
 websocket '/:ring/:role' => sub {
 	my $self   = shift;
 	my $rnum   = $self->param( 'ring' );
-	my $client = $server->registry->add( $self, $rnum );
-	my $ring   = undef;
+	my $client = $server->registry->add( $self );
 
 	$self->inactivity_timeout( 3600 ); # 1 hour
 	$client->ping->start();
@@ -38,10 +32,11 @@ websocket '/:ring/:role' => sub {
 		my $request = $json->decode( shift );
 
 		# ===== REJECT UNAUTHORIZED USERS
-		my $security   = $server->config->security();
+		my $security = $server->config->security();
 		if( $security->enabled() ) {
 			unless( $security->authenticated( $client ) && $security->authorized( $rnum )) {
-				$server->send->client( { json => { error => $security->unauthorized(), request => $request }});
+				my $response = { error => $security->unauthorized(), request => $request };
+				$server->send->client( $response );
 				return;
 			}
 		}
@@ -54,7 +49,8 @@ websocket '/:ring/:role' => sub {
 			$server->handle( $request ); 
 
 		} catch { 
-			$server->send->client({ json => { error => "Error while processing request: $_\n", request => $request }}); 
+			my $response = { error => "Error while processing request: $_\n", request => $request };
+			$server->send->client( $response ); 
 
 		};
 		print STDERR "\n" if $DEBUG;
@@ -64,10 +60,11 @@ websocket '/:ring/:role' => sub {
 	# Handle disconnects
 	# ----------------------------------------
 	$self->on( finish => sub { 
-		my $request = { type => 'user', action => 'update', ring => $rnum, user => { action => 'disconnect', sessid => $client->sessid(), id => $client->id(), role => $client->role() }};
-		$server->registry->remove( $client );
-		$server->broadcast_updated_users( $request, $ring, $client->group());
+		my $request  = { request => { subject => 'client', action => 'disconnect', from => $server->id(), ring => $rnum }};
+		my $response = { subject => 'client', ring => $rnum, client => { sessid => $client->sessid(), id => $client->id(), role => $client->role() }, request => $request };
 		$client->ping->quit();
+		$server->send->group( $response );
+		$server->registry->remove( $client );
 	});
 };
 

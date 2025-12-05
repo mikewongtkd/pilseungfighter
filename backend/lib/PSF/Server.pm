@@ -20,7 +20,6 @@ use PSF::Server::Comms::Division;
 use PSF::Server::Comms::Match;
 use PSF::Server::Comms::Ring;
 use PSF::Server::Comms::Server;
-use PSF::Server::Comms::Tournament;
 
 our $DEBUG = 1;
 
@@ -41,6 +40,8 @@ sub init {
 	$self->{ _registery }  = new PSF::Client::Registry();
 	$self->{ _comms }      = new PSF::Server::Comms( $self );
 	$self->{ _json }       = (new JSON::XS())->boolean_values( 0, 1 );
+
+	# ===== SERVER COMMS PROTOCOL OBJECTS (SCPOs)
 	$self->{ client }      = new PSF::Server::Comms::Client( $self );
 	$self->{ division }    = new PSF::Server::Comms::Division( $self );
 	$self->{ match }       = new PSF::Server::Comms::Match( $self );
@@ -94,7 +95,7 @@ sub client_health_check {
 
 	return unless $ring ne 'staging' && $group->changed();
 
-	my $response = { type => 'users', action => 'update', ring => $ring };
+	my $response = { subject => 'client', ring => $ring };
 	$self->send->group( $response );
 }
 
@@ -104,18 +105,18 @@ sub handle {
 	my $self     = shift;
 	my $request  = shift;
 	my $action   = $request->{ action }; $action =~ s/\s+/_/g;
-	my $type     = $request->{ type };   $type =~ s/\s+/_/g;
+	my $subject  = $request->{ subject }; $subject =~ s/\s+/_/g;
 	my $cid      = $request->{ from };
 	my $client   = $self->registry->client( $cid );
 
-	die "Server Error: Subject $type not defined $!" unless exists $self->{ $type };
-	die "Server Error: Subject $type does not implement Server Comms Protocol $!" unless( ref( $self->{ $type }) && $self isa PSF::Server::Comms::Protocol )
+	die "Server Error: Subject $subject not defined $!" unless exists $self->{ $subject };
+	die "Server Error: Subject $subject does not implement Server Comms Protocol $!" unless( ref( $self->{ $subject }) && ref $self eq 'PSF::Server::Comms::Protocol' );
 
-	my $subject = $self->{ $type };
+	my $scpo = $self->{ $subject }; # Server Comms Protocol Object
 
-	die "Server Error: Subject $type cannot implement the requested action $action $!" unless $subject->can( $action );
+	die "Server Error: Subject $subject cannot implement the requested action $action $!" unless $scpo->can( $action );
 
-	return $subject->$action( $request, $client );
+	return $scpo->$action( $request, $client );
 }
 
 # ============================================================

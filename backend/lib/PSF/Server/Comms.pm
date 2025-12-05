@@ -42,7 +42,7 @@ sub client {
 	print STDERR "  Sending division information (message ID: $mid) to:\n" if $DEBUG;
 	printf STDERR "    %-17s  %s  %s\n", $cstatus->{ role }, $cstatus->{ cid }, $cstatus->{ health } if $DEBUG;
 
-	$cleint->send({ json => $response });
+	$client->send({ json => $response });
 }
 
 # ============================================================
@@ -79,18 +79,27 @@ sub group {
 sub stringify {
 # ============================================================
 	my $self  = shift;
-	my $data  = shift;
+	my $data  = shift; $data = defined $data ? $data : $self;
 	my $json  = new JSON::XS();
-	my $clone = unbless( clone( $data ));
-	my $uuid  = undef;
+	my $ref   = ref $data;
 
-	if( ref
-	if( exists $data->{ uuid }) {
-		$uuid = $data->{ uuid };
-		delete $data->{ uuid };
+	if( $ref ) {
+		if( $ref eq 'ARRAY' ) {
+			return $json->canonical->encode( $data );
+
+		} else {
+			my $clone = unbless( clone( $data ));
+			my $uuid  = undef;
+			if( exists $clone->{ uuid }) {
+				$uuid = $clone->{ uuid };
+				delete $clone->{ uuid };
+			}
+			PSF::DBO::_prune( $clone );
+			return $json->canonical->encode( $clone );
+		}
+	} else {
+		return $data;
 	}
-	PSF::DBO::_prune( $data );
-	$data->{ uuid } = $uuid;
 }
 
 1;

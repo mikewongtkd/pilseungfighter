@@ -23,12 +23,14 @@ sub init {
 # ============================================================
 sub authenticated {
 # ============================================================
-	my $self = shift;
+	my $self   = shift;
 	my $client = shift;
 	$self->{ client }  = $client;
+	return 1; # MW - TODO Look into how to implement using PHP Sessions using SQLite3
+
 	$self->{ session } = new PHP::Session( $client->sessid(), { save_path => '/usr/local/psf/sessions' });
-	my $authorized = $self->{ session }->get( 'is_auth' );
-	return $authorized;
+	my $authenticated = $self->{ session }->get( 'is_auth' );
+	return $authenticated;
 }
 
 # ============================================================
@@ -36,6 +38,8 @@ sub authorized {
 # ============================================================
 	my $self   = shift;
 	my $ring   = shift;
+	return 1; # MW
+
 	my $domain = $self->{ session }->get( 'ring' );
 	$self->{ ring } = $ring;
 

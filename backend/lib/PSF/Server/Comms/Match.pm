@@ -60,7 +60,7 @@ sub start_deductions_over_time {
 
 		$score->add_update( $update );
 
-		my $serverid = $self->server->id()
+		my $serverid = $self->server->id();
 		my $request  = { %{ $update->document() }, type => "score", action => "update", from => $serverid, ring => $ring };
 		my $response = { type => "score", request => $request, score => $score->document() };
 		$self->send->group( $response );

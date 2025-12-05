@@ -35,8 +35,10 @@ sub time {
 	my $finish = $self->finish();
 	my $format = '%Y-%m-%d %:%M:%S%Z';
 
-	$start  = defined $start  ? Time::Piece->strptime( $start . 'Z', $format );
-	$finish = defined $finish ? Time::Piece->strptime( $finish . 'Z', $format );
+	$start  = defined $start  ? Time::Piece->strptime( $start . 'Z', $format ) : undef;
+	$finish = defined $finish ? Time::Piece->strptime( $finish . 'Z', $format ) : undef;
+
+	return 0 unless( defined $start && defined $finish );
 
 	my $delta   = $finish - $start;
 	my $seconds = $delta->seconds();

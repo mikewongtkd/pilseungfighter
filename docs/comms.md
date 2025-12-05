@@ -10,21 +10,25 @@ Most communication is initiated by a client. Typically a client makes a request 
 
 One notable exception is server pings to gauge client connection strength. 
 
+### Service Dispatch
+
+The server handles client requests by instantiating a *server comms protocol* object (SCPO), that corresponds to the `subject` of the request. For example, `match` requests are managed by the *match* SCPO. If the server protocol object recognizes (implements) the requested action, then the server delegates to the SCPO to resolve the request and provide a response.
+
 ### Requests
 
 	{
-		"subject" : contestant | division | match | ring | round,
-		"action" : read | write | delete | <subject action>,
+		"subject" : client | contestant | division | match | ring | round,
+		"action" : read | write | delete | first | search | <subject action>,
 		"from" : <cid>, 
 		"ring" : <rnum>
 		...
 	}
 
-The fields`from` and `ring` are automatically supplied by the server. Server-sent requests have CID = 0 and the ring is set depending on circumstances.
+The fields `from` and `ring` are automatically supplied by the server. Server-sent requests have CID = 0 and the ring is set depending on circumstances.
 
 #### Universal Requests
 
-All PSF objects respond to the following requests
+All PSFCP objects are subclasses of the `PSF::Server::Comms::Protocol` class, which implements the following requests. All PSFCP classes must implement the `_subject()` and `_factory()` methods to enable these universal requests for each class.
 
 ##### Create/Update
 
@@ -65,7 +69,7 @@ If `<cid>` is 0, then the request originates from the server.
 
     {
         "request": <request>
-        "subject": contestant | division | match | ring | round,
+        "subject": client | contestant | division | match | ring | round,
         <subject>
     }
 

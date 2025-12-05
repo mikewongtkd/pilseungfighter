@@ -1,0 +1,243 @@
+{
+  "$id": "https://example.com/schemas/psfcp-message-schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PSFCP Message",
+  "type": "object",
+  "required": ["subject", "action", "from", "ring"],
+  "additionalProperties": false,
+  "properties": {
+    "subject": {
+      "type": "string",
+      "enum": ["client", "contestant", "division", "match", "ring", "round"]
+    },
+    "action": {
+      "type": "string"
+    },
+    "from": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0 },
+        { "type": "string", "pattern": "^[0-9a-fA-F-]{36}$" }
+      ]
+    },
+    "ring": {
+      "oneOf": [{ "type": "integer" }, { "type": "string" }]
+    },
+    "request": {
+      "type": ["object", "null"]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "subject": { "const": "contestant" } }
+      },
+      "then": {
+        "anyOf": [
+          { "$ref": "#/definitions/contestantWrite" },
+          { "$ref": "#/definitions/contestantRead" },
+          { "$ref": "#/definitions/contestantGet" }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": { "subject": { "const": "division" } }
+      },
+      "then": {
+        "anyOf": [
+          { "$ref": "#/definitions/divisionWrite" },
+          { "$ref": "#/definitions/divisionDelete" },
+          { "$ref": "#/definitions/divisionAddContestant" },
+          { "$ref": "#/definitions/divisionAddMatch" },
+          { "$ref": "#/definitions/divisionGet" }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": { "subject": { "const": "match" } }
+      },
+      "then": {
+        "anyOf": [
+          { "$ref": "#/definitions/matchRead" },
+          { "$ref": "#/definitions/matchScore" },
+          { "$ref": "#/definitions/matchUpdatePenaltyTimer" },
+          { "$ref": "#/definitions/matchWrite" },
+          { "$ref": "#/definitions/matchGet" }
+        ]
+      }
+    }
+  ],
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F-]{36}$"
+    },
+    "contestantObject": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": true,
+      "properties": {
+        "uuid": { "$ref": "#/definitions/uuid" },
+        "name": { "type": "string" },
+        "team": { "type": "string" },
+        "dojang": { "type": "string" },
+        "age": { "type": "integer" }
+      }
+    },
+    "matchObject": {
+      "type": "object",
+      "required": ["uuid"],
+      "additionalProperties": true,
+      "properties": {
+        "uuid": { "$ref": "#/definitions/uuid" },
+        "chung": { "$ref": "#/definitions/contestantObject" },
+        "hong": { "$ref": "#/definitions/contestantObject" },
+        "round": { "type": "string" },
+        "scores": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+
+    "contestantWrite": {
+      "properties": {
+        "action": { "const": "write" },
+        "contestant": { "$ref": "#/definitions/contestantObject" }
+      },
+      "required": ["action", "contestant"]
+    },
+    "contestantRead": {
+      "properties": {
+        "action": { "const": "read" },
+        "contestant": { "$ref": "#/definitions/uuid" }
+      },
+      "required": ["action", "contestant"]
+    },
+    "contestantGet": {
+      "properties": {
+        "action": { "enum": ["get", "get one"] },
+        "contestant": { "type": "object" }
+      },
+      "required": ["action", "contestant"]
+    },
+
+    "divisionWrite": {
+      "properties": {
+        "action": { "const": "write" },
+        "division": {
+          "type": "object",
+          "required": ["name"],
+          "properties": {
+            "uuid": { "$ref": "#/definitions/uuid" },
+            "name": { "type": "string" },
+            "category": { "type": "string" }
+          },
+          "additionalProperties": true
+        }
+      },
+      "required": ["action", "division"]
+    },
+    "divisionDelete": {
+      "properties": {
+        "action": { "const": "delete" },
+        "division": { "$ref": "#/definitions/uuid" }
+      },
+      "required": ["action", "division"]
+    },
+    "divisionAddContestant": {
+      "properties": {
+        "action": { "const": "add_contestant" },
+        "contestant": { "$ref": "#/definitions/contestantObject" }
+      },
+      "required": ["action", "contestant"]
+    },
+    "divisionAddMatch": {
+      "properties": {
+        "action": { "const": "add_match" },
+        "round": { "type": "string" },
+        "match": { "$ref": "#/definitions/matchObject" }
+      },
+      "required": ["action", "round", "match"]
+    },
+    "divisionGet": {
+      "properties": {
+        "action": { "enum": ["get", "get one", "read"] },
+        "division": { "type": ["object", "string", "null"] }
+      },
+      "required": ["action"]
+    },
+
+    "matchRead": {
+      "properties": {
+        "action": { "const": "read" },
+        "match": { "$ref": "#/definitions/uuid" }
+      },
+      "required": ["action", "match"]
+    },
+
+    "matchWrite": {
+      "properties": {
+        "action": { "const": "write" },
+        "match": { "$ref": "#/definitions/matchObject" }
+      },
+      "required": ["action", "match"]
+    },
+
+    "matchGet": {
+      "properties": {
+        "action": { "enum": ["get", "get one"] },
+        "match": { "type": "object" }
+      },
+      "required": ["action"]
+    },
+
+    "matchScore": {
+      "properties": {
+        "action": { "const": "score" },
+        "contestant": { "enum": ["chung", "hong"] },
+        "presentation": {
+          "type": "number",
+          "minimum": -10,
+          "maximum": 10
+        },
+        "technical": {
+          "type": "number",
+          "minimum": -10,
+          "maximum": 10
+        },
+        "deduction": {
+          "type": "number",
+          "minimum": -10,
+          "maximum": 10
+        },
+        "match": { "$ref": "#/definitions/matchObject" }
+      },
+      "required": ["action", "contestant"]
+    },
+
+    "matchUpdatePenaltyTimer": {
+      "properties": {
+        "action": { "const": "update penalty timer" },
+        "match": {
+          "type": "object",
+          "required": ["uuid"],
+          "properties": { "uuid": { "$ref": "#/definitions/uuid" } }
+        },
+        "contestant": { "enum": ["chung", "hong"] },
+        "timer": {
+          "type": "object",
+          "required": ["action"],
+          "properties": {
+            "action": { "enum": ["start", "pause", "resume", "reset"] },
+            "remaining": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": true
+        }
+      },
+      "required": ["action", "match", "contestant", "timer"]
+    }
+  }
+}
+

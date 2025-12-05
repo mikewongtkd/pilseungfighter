@@ -22,43 +22,49 @@ Exhibition matches may be arranged for contestants who do not otherwise have a r
 
 Weight classes are as follows:
 
-| Age    | Women's Division                                 |
-| ------ | ------------------------------------------------ |
-| U7     | U19, U23, U27, O27                               |
-| U9     | U21, U25, U30, O30                               |
-| Youth  | U44, U49, U55, U63, O63                          |
-| Cadet  | U29, U33, U37, U41, U44, U47, U51, U55, U59, O59 |
-| Junior | U42, U44, U46, U49, U52, U55, U59, U63, U68, O68 |
-| Senior | U46, U49, U53, U57, U62, U67, U73, O73           |
-| U40    | U50, U53, U57, U61, U66, U71, U77, O77           |
+| Age    | Women's Division                         |
+| ------ | ---------------------------------------- |
+| U7     | 19kg-, 23kg-, 27kg-, 27kg+               |
+| U9     | 21kg-, 25kg-, 30kg-, 30kg+               |
+| Youth  | 44kg-, 49kg-, 55kg-, 63kg-, 63kg+        |
+| Cadet  | 29kg-, 37kg-, 44kg-, 51kg-, 59kg-, 59kg+ |
+| Junior | 42kg-, 46kg-, 52kg-, 59kg-, 68kg-, 68kg+ |
+| Senior | 46kg-, 53kg-, 62kg-, 73kg-, 73kg+        |
+| U40    | 50kg-, 57kg-, 66kg-, 77kg-, 77kg+        |
 
-| Age    | Men's Division                                   |
-| ------ | ------------------------------------------------ |
-| U7     | U19, U23, U37, O27                               |
-| U9     | U21, U25, U30, O30                               |
-| Youth  | U48, U55, U63, U73, O73                          |
-| Cadet  | U33, U37, U41, U45, U49, U53, U57, U61, U65, O65 |
-| Junior | U45, U48, U51, U55, U59, U63, U68, U73, U78, O78 |
-| Senior | U54, U58, U63, U68, U74, U80, U87, O87           |
-| U40    | U63, U67, U72, U77, U83, U89, U96, O96           |
+| Age    | Men's Division                           |
+| ------ | ---------------------------------------- |
+| U7     | 19kg-, 23kg-, 27kg-, 27kg+               |
+| U9     | 21kg-, 25kg-, 30kg-, 30kg+               |
+| Youth  | 48kg-, 55kg-, 63kg-, 73kg-, 73kg+        |
+| Cadet  | 33kg-, 41kg-, 49kg-, 57kg-, 65kg-, 65kg+ |
+| Junior | 45kg-, 51kg-, 59kg-, 68kg-, 78kg-, 78kg+ |
+| Senior | 54kg-, 63kg-, 74kg-, 87kg-, 87kg+        |
+| U40    | 63kg-, 72kg-, 83kg-, 96kg-, 96kg+        |
 
 ### Competition Levels
 
-#### Elite Level Competition
+Tournaments may offer one or more different competition levels to provide a broader range of experiences for contestants.
 
-The highest-level athletes shall compete in one (1) round of 60 second duration. This shall be reserved for contestants aged 18-32 (senior division).
+#### Grassroots Competition
 
-| Age Category | Women's Division   | Men's Division     |
-| ------------ | ------------------ | ------------------ |
-| Senior Elite | U49, U57, U67, O67 | U58, U68, U80, O80 |
+This is the default level of competition, intended to promote general competition at a local level. Contestants aged 6 to 40 spar for one (1) round of 30 seconds duration.
 
-#### Champion Level Competition
-
-Athletes aged 6 to 40 may compete at this level, fighting for one (1) round of 30 second duration.
-
-#### Ultra Level Competition
+#### Silverback Competition
 
 Athletes aged 41 and older may compete at this level, fighting for one (1) round of 20 second duration.
+
+#### Champion Competition
+
+This is a higher level of competition, intended to promote general competition at a national level. Contestants aged 12 to 32 spar for one (1) round of 45 seconds duration and light head contact is allowed. Excessive head contact shall be penalized and may result in stoppage with a decision for the injured contestant.
+
+#### Elite Level Competition
+
+The highest-level athletes shall compete in one (1) round of 60 second duration. This shall be reserved for contestants aged 18-32 (senior division) and full head contact is allowed.
+
+| Age Category | Women's Division           | Men's Division             |
+| ------------ | -------------------------- | -------------------------- |
+| Senior Elite | 49kg-, 57kg-, 67kg-, 67kg+ | 58kg-, 68kg-, 80kg-, 80kg+ |
 
 ## Competition Scoring
 
@@ -68,9 +74,10 @@ Conditions that would improve a judges interest in a contestant include:
 
 1. Actively attacking or defending
 2. Exciting, dynamic offensive techniques and smart and practical defensive techniques
-3. Powerful techniques that deliver trembling shock to the opponent's valid scoring areas
-4. Good sportsmanship, clean technique, and self-control
-5. Clear mastery of combat sport, strategy, charisma, and athleticism
+3. Precisely controlled techniques to the head when light head contact is allowed
+4. Powerful techniques that deliver trembling shock to the opponent's valid scoring areas
+5. Good sportsmanship, clean technique, and self-control
+6. Clear mastery of combat sport, strategy, charisma, and athleticism
 
 The degree to which the judges award presentation points for the above criteria is up to each judge to determine, but generally 0.1 to 0.3 points per second.
 
@@ -80,25 +87,33 @@ At the end of the match, judges may adjust their final presentation score. The s
 
 #### Presentation Score Only (No PSS)
 
-| Score       | 0.0 to 2.0  | 2.1 to 4.0 | 4.1 to 5.0    | 5.1 to 6.0 |
-| ----------- | ----------- | ---------- | ------------- | ---------- |
-| Performance | Very Poor   | Poor       | Below Average | Average    |
-
-| Score       | 6.1 to 7.0 | 7.1 to 8.0 | 8.1 to 9.0 | 9.1 to 9.9   | 10.0    |
-| ----------- | ---------- | ---------- | ---------- | ------------ | ------- |
-| Performance | Good       | Very Good  | Excellent  | Near Perfect | Perfect |
+| Score      | Performance   |
+| ---------- | ------------- |
+| 0.0 to 2.0 | Very Poor     |
+| 2.1 to 4.0 | Poor          |
+| 4.1 to 5.0 | Below Average |
+| 5.1 to 6.0 | Average       |
+| 6.1 to 7.0 | Good          |
+| 7.1 to 8.0 | Very Good     |
+| 8.1 to 9.0 | Excellent     |
+| 9.1 to 9.9 | Near Perfect  |
+| 10.0       | Perfect       |
 
 #### Presentation and Technical Score (With PSS)
 
 If the PSS is available, then the presentation score is provided on a 0.0-6.0 scale
 
-| Score       | 0.0 to 1.2  | 1.3 to 2.4 | 2.5 to 3.0    | 3.1 to 3.6 |
-| ----------- | ----------- | ---------- | ------------- | ---------- |
-| Performance | Very Poor   | Poor       | Below Average | Average    |
-
-| Score       | 3.7 to 4.2 | 4.3 to 4.8 | 4.9 to 5.4 | 5.5 to 5.9   | 6.0     |
-| ----------- | ---------- | ---------- | ---------- | ------------ | ------- |
-| Performance | Good       | Very Good  | Excellent  | Near Perfect | Perfect |
+| Score      | Performance   |
+| ---------- | ------------- |
+| 0.0 to 1.2 | Very Poor     |
+| 1.3 to 2.4 | Poor          |
+| 2.5 to 3.0 | Below Average |
+| 3.1 to 3.6 | Average       |
+| 3.7 to 4.2 | Good          |
+| 4.3 to 4.8 | Very Good     |
+| 4.9 to 5.4 | Excellent     |
+| 5.5 to 5.9 | Near Perfect  |
+| 6.0        | Perfect       |
 
 ### Presentation Score Goes Down Over Time for Inactivity
 

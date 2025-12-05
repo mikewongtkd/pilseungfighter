@@ -42,10 +42,11 @@ If the update has the action `set`, then the following two parameters are also r
     {
         "name" : <name:text>,
         "gender" : f | m,
-        "age" : <age:int>,
+        "dob" : <dob:date>,
         "weight" : <weight:float>,
         "rank" : <rank:text>,
-        "seed" : <seed:float>
+        "seed" : <seed:float>,
+        "team" : <team:string>
     }
 
 ## Division
