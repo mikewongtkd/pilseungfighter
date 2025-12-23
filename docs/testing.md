@@ -1,7 +1,3 @@
-Below is a comprehensive **testing framework** in **Markdown format** for validating a PSFCP-based web application running on **port 3030**, including structure, test categories, test cases, and sample payloads.
-
----
-
 # **Pilsung Fighter Communication Protocol (PSFCP) – Testing Framework**
 
 This document defines a full testing framework for verifying compliance of a PSFCP-enabled web application (default WebSocket port **3030**) with the expected communication structure, behaviors, subjects, actions, and server–client lifecycle.
@@ -395,15 +391,3 @@ Recommended:
   }
 }
 ```
-
----
-
-If you want, I can also generate:
-
-✅ A full **JSON Schema** set for all PSFCP subjects
-✅ An automated **Node.js testing harness**
-✅ A **Python PyTest/WebSocket** testing suite
-✅ A **Postman collection** for WS testing
-
-Just tell me what you’d like next!
-
