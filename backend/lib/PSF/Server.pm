@@ -47,7 +47,6 @@ sub init {
 	$self->{ match }       = new PSF::Server::Comms::Match( $self );
 	$self->{ ring }        = new PSF::Server::Comms::Ring( $self );
 	$self->{ server }      = new PSF::Server::Comms::Server( $self );
-	$self->{ tournament }  = new PSF::Server::Comms::Tournament( $self );
 
 }
 
