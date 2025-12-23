@@ -1,4 +1,5 @@
 package PSF::Server::Comms;
+use lib qw( /usr/local/psf/lib );
 use PSF::DBO;
 use JSON::XS;
 use Data::Structure::Util qw( unbless );
