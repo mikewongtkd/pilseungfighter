@@ -1,8 +1,10 @@
-package PSF::Class::Ring;
+package PSF::Class::Tournament;
 use lib qw( /usr/local/psf/lib );
 use base qw( PSF::DBO );
 our $defaults = {
-	id         => undef
+	id         => undef,
+	name       => undef,
+	rings      => undef
 };
 
 use base qw( PSF::DBO );

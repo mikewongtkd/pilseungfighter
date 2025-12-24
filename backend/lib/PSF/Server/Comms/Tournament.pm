@@ -1,4 +1,4 @@
-package PSF::Server::Comms::Ring;
+package PSF::Server::Comms::Tournament;
 
 use lib qw( /usr/local/psf/lib );
 use base qw( PSF::Server::Comms::Protocol );
@@ -12,9 +12,9 @@ sub _factory {
 
 	if( exists $request->{ $subject }{ uuid }) {
 		my $uuid = $request->{ $subject }{ uuid };
-		return new PSF::Class::Ring( $uuid );
+		return new PSF::Class::Tournament( $uuid );
 	} else {
-		return new PSF::Class::Ring();
+		return new PSF::Class::Tournament();
 	}
 }
 
@@ -25,14 +25,14 @@ sub _search {
 	my $request = shift;
 	my $subject = $self->_subject();
 
-	return PSF::Class::Ring->search( where => $request->{ $subject });
+	return PSF::Class::Tournament->search( 'where' => $request->{ $subject });
 }
 
 # ============================================================
 sub _subject {
 # ============================================================
 	my $self = shift;
-	return 'ring';
+	return 'tournament';
 }
 
 1;

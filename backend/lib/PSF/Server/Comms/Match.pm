@@ -150,7 +150,7 @@ sub _search {
 	my $request = shift;
 	my $subject = $self->_subject();
 
-	return PSF::Class::Match->search( $request->{ $subject });
+	return PSF::Class::Match->search( where => $request->{ $subject });
 }
 
 # ============================================================

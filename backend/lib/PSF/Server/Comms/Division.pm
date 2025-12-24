@@ -25,7 +25,7 @@ sub _search {
 	my $request = shift;
 	my $subject = $self->_subject();
 
-	return PSF::Class::Division->search( $request->{ $subject });
+	return PSF::Class::Division->search( where => $request->{ $subject });
 }
 
 # ============================================================
