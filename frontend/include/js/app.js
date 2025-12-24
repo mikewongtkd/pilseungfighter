@@ -1,23 +1,28 @@
 PilseungFighter.App = class PSFApp {
 	constructor( ring = null ) {
-		this._id      = UUID.v4();
-		this._ring    = ring;
-		this._button  = {};
-		this._display = {};
-		this._input   = {};
-		this._modal   = {};
-		this._network = new PilseungFighter.WebSocket( this );
-		this._refresh = {};
-		this._sound   = new PilseungFighter.Sound();
-		this._state   = {};
-		this._page    = {};
-		this._widget  = {};
-		this.on       = {
+		this._id       = UUID.v4();
+		this._ring     = ring;
+		this._alertify = alertify;
+		this._button   = {};
+		this._display  = {};
+		this._input    = {};
+		this._modal    = {};
+		this._network  = new PilseungFighter.WebSocket( this );
+		this._refresh  = {};
+		this._sound    = new PilseungFighter.Sound();
+		this._state    = {};
+		this._page     = {};
+		this._widget   = {};
+		this.on        = {
 			connect : url => {
 				this._network.set( url );
 				return this;
 			}
 		};
+
+		// Alertify defaults
+		alertify.defaults.theme.ok     = "btn btn-success";
+		alertify.defaults.theme.cancel = "btn btn-warning";
 
 		// Event Handler
 		this._event = new PilseungFighter.EventServer( this );
@@ -55,19 +60,20 @@ PilseungFighter.App = class PSFApp {
 		};
 	}
 
-	get button()  { return this._button; }
-	get display() { return this._display; }
-	get event()   { return this._event; }
-	get id()      { return this._id; }
-	get input()   { return this._input; }
-	get modal()   { return this._modal; }
-	get network() { return this._network; }
-	get page()    { return this._page; }
-	get refresh() { return this._refresh; }
-	get ring()    { return this._ring; }
-	get sound()   { return this._sound; }
-	get state()   { return this._state; }
-	get widget()  { return this._widget; }
+	get alertify() { return this._alertify; }
+	get button()   { return this._button; }
+	get display()  { return this._display; }
+	get event()    { return this._event; }
+	get id()       { return this._id; }
+	get input()    { return this._input; }
+	get modal()    { return this._modal; }
+	get network()  { return this._network; }
+	get page()     { return this._page; }
+	get refresh()  { return this._refresh; }
+	get ring()     { return this._ring; }
+	get sound()    { return this._sound; }
+	get state()    { return this._state; }
+	get widget()   { return this._widget; }
 
 
 	// App caches for general UI/UX usage

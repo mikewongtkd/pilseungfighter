@@ -12,7 +12,7 @@ class WebFramework {
 	public function links() {
 		foreach( $this->links as $link ) {
 			if( ! in_array( $link, WebFramework::$listed )) {
-				echo "\t<link href=\"{$link}\" />\n";
+				echo "<link rel=\"stylesheet\" href=\"{$link}\"/>\n";
 				WebFramework::$listed[]= $link;
 			}
 		}
@@ -26,7 +26,7 @@ class WebFramework {
 	public function scripts() {
 		foreach( $this->scripts as $script ) {
 			if( ! in_array( $script, WebFramework::$listed )) {
-				echo "\t<script src=\"{$script}\"></script>\n";
+				echo "<script src=\"{$script}\"></script>\n";
 				WebFramework::$listed[]= $script;
 			}
 		}

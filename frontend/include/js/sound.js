@@ -12,7 +12,7 @@ PilseungFighter.Sound = class PSFSound {
 			formats.forEach( format => {
 				urls.push( `/sounds/${file}.${format}` );
 			});
-			this[ sound ] = new Howl({ urls });
+			this[ sound ] = new Howl({ src: urls });
 		});
 	}
 }
