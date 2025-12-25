@@ -8,7 +8,6 @@ use PSF::Class::Match::Round;
 use PSF::Class::Score;
 
 our $defaults = {
-	tournament     => undef,
 	id             => undef,
 	name           => '',
 	method         => 'cutoff',

@@ -1,6 +1,7 @@
 package PSF::Server::Comms::Protocol;
 use lib qw( /usr/local/psf/lib );
 use Clone qw( clone );
+use Lingua::EN::Inflexion qw( noun );
 
 # ============================================================
 sub new {
@@ -23,11 +24,26 @@ sub init {
 # ============================================================
 sub first {
 # ============================================================
-	my $self    = shift;
-	my $request = shift;
+	my $self     = shift;
+	my $request  = shift;
+	my @rows     = $self->_search( $request );
+	my $first    =  int( @rows ) ? $rows[ 0 ] : undef;
+	my $subject  = $self->_subject();
+	my $response = { request => $request, subject => $subject, $subject => $first };
+	$self->send->client( $response );
+}
 
-	my @rows    = $self->_search( $request );
-	return int( @rows ) ? $rows[ 0 ] : undef;
+# ============================================================
+sub list {
+# ============================================================
+	my $self     = shift;
+	my $request  = shift;
+	my @rows     = $self->_list();
+	my $subject  = $self->_subject();
+	my $subjects = noun( $subject )->plural();
+
+	my $response = { request => $request, subject => $subject, $subjects => [ @rows ]};
+	$self->send->client( $response );
 }
 
 # ============================================================
@@ -40,6 +56,7 @@ sub read {
 		die "Response Error: No UUID specified for read request $!";
 	}
 
+	my $subject  = $self->_subject();
 	my $instance = $self->_factory( $request );
 	my $response = { request => $request, subject => $subject, $subject => $instance->document() };
 	$self->send->client( $response );
@@ -48,8 +65,8 @@ sub read {
 # ============================================================
 sub search {
 # ============================================================
-	my $self    = shift;
-	my $request = shift;
+	my $self     = shift;
+	my $request  = shift;
 
 	return $self->_search( $request );
 }
@@ -91,6 +108,13 @@ sub _factory {
 # ============================================================
 	my $self = shift;
 	return undef;
+}
+
+# ============================================================
+sub _list {
+# ============================================================
+	my $self = shift;
+	return ();
 }
 
 # ============================================================

@@ -40,13 +40,6 @@ class AppFramework extends WebFramework {
 		}
 	}
 
-	public function accessControlAllowOrigin() {
-		$protocol = $this->config->protocol;
-		$host     = $this->config->host;
-		$port     = $this->config->port->webserver == 80 ? '' : ":{$this->config->port->webserver}";
-		header( "Access-Control-Allow-Origin: {$protocol}{$host}{$port}" );
-	}
-
 	public function websocket( $ring = 'staging', $role = 'admin' ) {
 		$protocol = $this->config->protocol == 'https://' ? 'wss://' : 'ws://';
 		$host     = $this->config->host;

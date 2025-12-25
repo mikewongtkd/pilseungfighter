@@ -131,7 +131,7 @@ sub rank_contestants {
 				}
 			}
 			foreach my $field ( qw( presentation win technical deduction )) {
-				$mean->{ $field } /= $n
+				$mean->{ $field } /= $n;
 				$mean->{ $field } = 0.0 + sprintf( "%.3f", $mean->{ $field });
 			}
 
@@ -155,7 +155,7 @@ sub rank_contestants {
 	my $k = $#rankings;
 	TIE: foreach my $i ( 0 .. $k ) {
 		my $a = $rankings[ $i ];
-		next if exists $a->{ tied } && defined( $a->{ tied };
+		next if exists $a->{ tied } && defined $a->{ tied };
 
 		my $tied = { place => 0, contestants => []};
 

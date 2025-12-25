@@ -1,9 +1,10 @@
 package PSF::Server::Comms;
 use lib qw( /usr/local/psf/lib );
 use PSF::DBO;
-use JSON::XS;
-use Data::Structure::Util qw( unbless );
 use Clone qw( clone );
+use Data::Structure::Util qw( unbless );
+use Digest::SHA1 qw( sha1_hex );
+use JSON::XS;
 
 # ============================================================
 sub new {
@@ -55,11 +56,11 @@ sub group {
 	my $cid         = $request->{ from };
 	my $ring        = $request->{ ring };
 	my $registry    = $self->server->registry();
-	my $client      = $registry->client( $cid ); die "Client not found $!" unless $client;
-	my $from_server = defined $cid && $cid == 0;
+	my $from_server = defined( $cid ) && $cid == 0;
+	my $client      = $from_server ? undef : $registry->client( $cid ); die "Client '$cid' not found $!" unless ($client || $from_server);
 	my $group       = $from_server ? $registry->group( $ring ) : $client->group();
-	my $json        = $self->{ _json };
 	my $status      = $group->status();
+	my $json        = new JSON::XS();
 	my $digest      = sha1_hex( $json->canonical->encode( $response ));
 	my $mid         = substr( $digest, 0, 4 );
 

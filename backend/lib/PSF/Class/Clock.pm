@@ -62,7 +62,7 @@ sub delete {
 sub finish {
 # ============================================================
 	my $self   = shift;
-	my $status = $self->status()
+	my $status = $self->status();
 
 	if( $status eq 'running' ) {
 		$self->status( 'expired' );

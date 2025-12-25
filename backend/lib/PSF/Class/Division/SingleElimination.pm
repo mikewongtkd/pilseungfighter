@@ -25,7 +25,7 @@ sub init {
 sub build_bracket {
 # ============================================================
 	my $self        = shift;
-	my $division    = $self->{ division }
+	my $division    = $self->{ division };
 	my @contestants = sort { $b->seed() cmp $a->seed() } shuffle $division->contestants();
 	my $n           = int( @contestants );
 	return () if $n == 0;

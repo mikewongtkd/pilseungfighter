@@ -19,6 +19,7 @@ our $statement = {
 	delete     => "update document set deleted = datetime( 'now' ) where uuid=? and deleted is null",
 	exists     => 'select count(*) > 0 from document where uuid=? and deleted is null',
 	get        => 'select * from document where uuid=? and deleted is null',
+	list       => 'select * from document where deleted is null',
 	insert     => 'insert into document (uuid, class, data) values (?, ?, ?)',
 	now        => "update document json_set( data, ?, datetime( 'now' )) where uuid = ? and deleted is null",
 	references => "select * from document where upper( class ) like :class and case when :column = :uuid or :column like '[%:uuid%]' and deleted is null",
@@ -207,6 +208,23 @@ sub get {
 }
 
 # ============================================================
+sub list {
+# ============================================================
+	my $class = _class( shift );
+
+	_db_connect();
+
+	my $sth = _prepared_statement( 'list' );
+	$sth->execute();
+	my @rows = ();
+	while( my $row = $sth->fetchrow_hashref()) {
+		my $uuid = $row->{ uuid };
+		push @rows, "PSF::$class"->new( $uuid );
+	}
+	return @rows;
+}
+
+# ============================================================
 sub json {
 # ============================================================
 	my $self     = shift;
@@ -257,7 +275,7 @@ sub search {
 			if( int( @$value ) == 2 && all { looks_like_number( $_ ) } @$value ) {
 				my $min = sprintf( ":%s_min", $key );
 				my $max = sprintf( ":%s_max", $key );
-				push @where, "$key >= :min_$key and $key <= :max_$key";
+				push @where, "$key >= $min and $key <= $max";
 				$np->{ $min } = $value->[ 0 ];
 				$np->{ $max } = $value->[ 1 ];
 
@@ -391,7 +409,7 @@ sub _class {
 # ============================================================
 sub _db_connect {
 # ============================================================
-	$PSF::DBO::dbh = DBI->connect( 'dbi:SQLite:db.sqlite' ) if( ! defined $PSF::DBO::dbh );
+	$PSF::DBO::dbh = DBI->connect( 'dbi:SQLite:/usr/local/psf/psf.sqlite' ) if( ! defined $PSF::DBO::dbh );
 }
 
 # ============================================================
@@ -510,30 +528,19 @@ sub _get {
 }
 
 # ============================================================
-sub _prepare_statement {
-# ============================================================
-	my $name = shift;
-	my $sql  = shift;
-	die "System-defined prepared statement named '$name' already exists $!" if exists $PSF::DBO::statement->{ $name };
-
-	# Return Singleton if exists and defined
-	return $PSF::DBO::sth->{ $name } if exists $PSF::DBO::sth->{ $name } && $PSF::DBO::sth->{ $name };
-
-	# Else prepare the statement handle and return
-	return $PSF::DBO::sth->{ $name } = $PSF::DBO::dbh->prepare( $sql );
-}
-
-# ============================================================
 sub _prepared_statement {
 # ============================================================
-	my $name = shift;
-	die "No prepared statement named '$name' $!" unless exists $PSF::DBO::statement->{ $name };
+	my $name   = shift;
+	my $exists = exists $PSF::DBO::statement->{ $name };
+	die "No prepared statement named '$name' $!" unless $exists;
 
 	# Return Singleton if exists and defined
-	return $PSF::DBO::sth->{ $name } if exists $PSF::DBO::sth->{ $name } && $PSF::DBO::sth->{ $name };
+	my $valid = exists $PSF::DBO::sth->{ $name } && defined $PSF::DBO::sth->{ $name };;
+	return $PSF::DBO::sth->{ $name } if $valid;
 
 	# Else prepare the statement handle and return
-	return $PSF::DBO::sth->{ $name } = $PSF::DBO::dbh->prepare( $PSF::DBO::statement->{ $name });
+	my $sql = $PSF::DBO::statement->{ $name };
+	return $PSF::DBO::sth->{ $name } = $PSF::DBO::dbh->prepare( $sql );
 }
 
 # ============================================================

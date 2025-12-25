@@ -19,7 +19,6 @@ use PSF::Server::Comms::Client;
 use PSF::Server::Comms::Division;
 use PSF::Server::Comms::Match;
 use PSF::Server::Comms::Ring;
-use PSF::Server::Comms::Tournament;
 use PSF::Server::Comms::Server;
 
 our $DEBUG = 1;
@@ -48,7 +47,6 @@ sub init {
 	$self->{ match }      = new PSF::Server::Comms::Match( $self );
 	$self->{ ring }       = new PSF::Server::Comms::Ring( $self );
 	$self->{ server }     = new PSF::Server::Comms::Server( $self );
-	$self->{ tournament } = new PSF::Server::Comms::Tournament( $self );
 
 }
 

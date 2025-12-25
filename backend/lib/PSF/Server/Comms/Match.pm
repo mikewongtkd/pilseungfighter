@@ -103,21 +103,6 @@ sub update_penalty_timer {
 }
 
 # ============================================================
-sub _factory {
-# ============================================================
-	my $self    = shift;
-	my $request = shift;
-	my $subject = $self->_subject();
-
-	if( exists $request->{ $subject }{ uuid }) {
-		my $uuid = $request->{ $subject }{ uuid };
-		return new PSF::Class::Match( $uuid );
-	} else {
-		return new PSF::Class::Match();
-	}
-}
-
-# ============================================================
 sub write {
 # ============================================================
 	my $self  = shift;
@@ -141,6 +126,29 @@ sub write {
 		} else {
 		}
 	}
+}
+
+# ============================================================
+sub _factory {
+# ============================================================
+	my $self    = shift;
+	my $request = shift;
+	my $subject = $self->_subject();
+
+	if( exists $request->{ $subject }{ uuid }) {
+		my $uuid = $request->{ $subject }{ uuid };
+		return new PSF::Class::Match( $uuid );
+	} else {
+		return new PSF::Class::Match();
+	}
+}
+
+# ============================================================
+sub _list {
+# ============================================================
+	my $self   = shift;
+	
+	return PSF::Class::Match->list();
 }
 
 # ============================================================

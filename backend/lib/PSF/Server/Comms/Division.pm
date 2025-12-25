@@ -2,6 +2,7 @@ package PSF::Server::Comms::Division;
 
 use lib qw( /usr/local/psf/lib );
 use base qw( PSF::Server::Comms::Protocol );
+use PSF::Class::Division;
 
 # ============================================================
 sub _factory {
@@ -16,6 +17,14 @@ sub _factory {
 	} else {
 		return new PSF::Class::Division();
 	}
+}
+
+# ============================================================
+sub _list {
+# ============================================================
+	my $self   = shift;
+	
+	return PSF::Class::Division->list();
 }
 
 # ============================================================

@@ -39,21 +39,22 @@ PilseungFighter.App = class PSFApp {
 		};
 
 		// On Connect actions
+		this.list = {
+			ring : ( ring = 'staging' ) => { 
+				let message = { subject : 'ring', action : 'list' };
+				this._network.connect( message ); 
+				this.ping.on(); 
+			}
+		};
 		this.read = {
 			division : ( divid = null ) => { 
-				let message = { subject : 'division', action : 'read' }; 
+				let message = { subject : 'division', action : 'search', division : { id : divid }}; 
 				if( divid !== null ) { message.divid = divid };
 				this._network.connect( message ); 
 				this.ping.on(); 
 			},
-			ring : ( ring = null ) => { 
-				let message = { subject : 'ring', action : 'read' };
-				if( ring !== null ) { message.ring = divid };
-				this._network.connect( message ); 
-				this.ping.on(); 
-			},
-			tournament : ()=> { 
-				let message = { subject : 'tournament', action : 'read' };
+			ring : ( ring = 'staging' ) => { 
+				let message = { subject : 'ring', action : 'search', ring : { ring }};
 				this._network.connect( message ); 
 				this.ping.on(); 
 			}

@@ -11,7 +11,7 @@ use Try::Tiny;
 
 our $json   = (new JSON::XS())->boolean_values( 0, 1 );
 our $server = new PSF::Server();
-our $DEBUG  = 1;
+our $DEBUG  = 0;
 
 # ------------------------------------------------------------
 # MANAGE RINGS, DIVISIONS, AND ATHLETES VIA WEBSOCKETS
@@ -60,7 +60,7 @@ websocket '/:ring/:role' => sub {
 	# Handle disconnects
 	# ----------------------------------------
 	$self->on( finish => sub { 
-		my $request  = { request => { subject => 'client', action => 'disconnect', from => $server->id(), ring => $rnum }};
+		my $request  = { subject => 'client', action => 'disconnect', from => $server->id(), ring => $rnum };
 		my $response = { subject => 'client', ring => $rnum, client => { sessid => $client->sessid(), id => $client->id(), role => $client->role() }, request => $request };
 		$client->ping->quit();
 		$server->send->group( $response );

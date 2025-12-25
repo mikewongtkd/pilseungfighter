@@ -93,7 +93,7 @@ PilseungFighter.WebSocket = class PSFWebSocket {
 			message: response => { 
 				let update  = JSON.parse( response.data );
 				let type    = update.type;
-				let action  = update.action;
+				let action  = update?.request?.action;
 				let request = update?.request;
 
 				if( this.comms.debug > 0 && ! (type == 'server' && action == 'ping' )) {
