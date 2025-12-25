@@ -25,16 +25,17 @@ sub add {
 # ============================================================
 	my $self       = shift;
 	my $websocket  = shift;
-	my $ring       = shift;
+	my $ring       = $websocket->param( 'ring' );
 	my $client     = new PSF::Client( $websocket );
 	my $group      = new PSF::Client::Group( $ring );
 	my $gid        = $group->id();
+	my $cid        = $client->cid();
 
 	if( exists $self->{ group }{ $gid }) { $group = $self->{ group }{ $gid } } 
 	else                                 { $self->{ group }{ $gid } = $group; }
 
 	$group->add( $client );
-	$self->{ client }{ $id } = $client;
+	$self->{ client }{ $cid } = $client;
 	$client->group( $group );
 
 	return $client;

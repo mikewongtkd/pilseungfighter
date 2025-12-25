@@ -4,6 +4,10 @@ use base qw( PSF::DBO );
 our $defaults = {
 	id         => undef,
 	name       => undef,
+	host       => undef,
+	location   => undef,
+	start      => undef,
+	end        => undef,
 	rings      => undef
 };
 

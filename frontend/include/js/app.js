@@ -32,8 +32,8 @@ PilseungFighter.App = class PSFApp {
 		this.ping.off = () => { this.network.comms?.heard( 'server' ).command( 'ping' ).respond(() => { this.network.send({ type : 'server', action : 'stop ping', ring }); }); }
 		this.ping.on  = () => {
 			this.network.comms.add( 'server', 'ping', ping => {
-				let timestamp = (new Date).toISOString();
-				let pong = { type : 'client', action : 'pong', ring, server : { ping : { timestamp : ping.server.timestamp }}, client : { pong : { timestamp }}};
+				let timestamp = Math.floor( Date.now() / 1000 );
+				let pong = { subject : 'client', action : 'pong', ring, server : { ping : { timestamp : ping.server.timestamp }}, client : { pong : { timestamp }}};
 				this.network.send( pong );
 			});
 		};
@@ -41,19 +41,19 @@ PilseungFighter.App = class PSFApp {
 		// On Connect actions
 		this.read = {
 			division : ( divid = null ) => { 
-				let message = { type : 'division', action : 'read' }; 
+				let message = { subject : 'division', action : 'read' }; 
 				if( divid !== null ) { message.divid = divid };
 				this._network.connect( message ); 
 				this.ping.on(); 
 			},
 			ring : ( ring = null ) => { 
-				let message = { type : 'ring', action : 'read' };
+				let message = { subject : 'ring', action : 'read' };
 				if( ring !== null ) { message.ring = divid };
 				this._network.connect( message ); 
 				this.ping.on(); 
 			},
 			tournament : ()=> { 
-				let message = { type : 'tournament', action : 'read' };
+				let message = { subject : 'tournament', action : 'read' };
 				this._network.connect( message ); 
 				this.ping.on(); 
 			}

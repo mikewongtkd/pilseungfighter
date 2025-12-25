@@ -49,21 +49,19 @@ sub client {
 # ============================================================
 sub group {
 # ============================================================
- 	my $self      = shift;
-	my $response  = shift;
-	my $request   = $response->{ request };
-	my $cid       = $request->{ from };
-	my $ring      = $request->{ ring };
-	my $registry  = $self->server->registry();
-	my $group     = defined $cid && $cid == 0 ?  $registry->group( $ring ) : $registry->client( $cid )->group();
-	my $json      = $self->{ _json };
-	my $status    = $group->status();
-	my $division  = defined $request->{ divid } ? $progress->find( $request->{ divid } ) : $progress->current();
-	my $message   = $division->clone();
-	my $unblessed = unbless( $message ); 
-	my $encoded   = $json->canonical->encode( $unblessed );
-	my $digest    = sha1_hex( $encoded );
-	my $mid       = substr( $digest, 0, 4 );
+ 	my $self        = shift;
+	my $response    = shift;
+	my $request     = $response->{ request };
+	my $cid         = $request->{ from };
+	my $ring        = $request->{ ring };
+	my $registry    = $self->server->registry();
+	my $client      = $registry->client( $cid ); die "Client not found $!" unless $client;
+	my $from_server = defined $cid && $cid == 0;
+	my $group       = $from_server ? $registry->group( $ring ) : $client->group();
+	my $json        = $self->{ _json };
+	my $status      = $group->status();
+	my $digest      = sha1_hex( $json->canonical->encode( $response ));
+	my $mid         = substr( $digest, 0, 4 );
 
 	print STDERR "  Broadcasting division information (message ID: $mid) to:\n" if $DEBUG;
 
@@ -71,7 +69,7 @@ sub group {
 		my $now       = (new Date::Manip::Date( 'now GMT' ))->printf( '%O' ) . 'Z';
 		my $cstatus   = $client->status();
 		printf STDERR "    %-17s  %s  %s\n", $cstatus->{ role }, $cstatus->{ cid }, $cstatus->{ health } if $DEBUG;
-		$client->send( { json => $response });
+		$client->send({ json => $response });
 	}
 	print STDERR "\n" if $DEBUG;
 }

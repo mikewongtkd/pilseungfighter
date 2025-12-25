@@ -1,6 +1,9 @@
 <?php
+  include_once( 'include/php/session.php' );
   include_once( 'include/php/app.php' );
-  $afw = new AppFramework();
+
+  $afw   = new AppFramework();
+  $comms = $afw->websocket();
 ?>
 <!DOCTYPE html>
 <html>
@@ -22,7 +25,12 @@
   <?= $afw->scripts() ?>
   <script>
     let app = new PilseungFighter.App( 'staging' );
-    app.alertify.success( "Hello World" );
+    app.on.connect( "<?= $comms ?>" ).read.tournament();
+
+    app.network.on
+      .heard( 'tournament' ).response( 'read' ).respond( update => {
+        console.log( 'UPDATE', update );
+      });
   </script>
 </html>
 <!-- vim: set nowrap ts=2 sw=2 expandtab -->

@@ -9,7 +9,7 @@ PilseungFighter.EventClient = class PSFEventClient {
 	handle( type, source, message ) {
 		let caller   = this.widget?.app ? this.widget : this.app;
 		let callback = caller?.event?.handler?.[ type ];
-		if( ! defined( callback )) {
+		if( ! callback ) {
 			let name = caller.constructor.name;
 			console.log( `${name} registered to handle event ${type}, but no callback defined` );
 			return;
@@ -59,7 +59,7 @@ PilseungFighter.EventServer = class PSFEventServer extends PilseungFighter.Event
 	register( type, listener ) {
 		let listeners = this.listeners?.[ type ];
 
-		if( ! defined( listeners ))       { listeners = this.listeners[ type ] = []; }
+		if( ! listeners )                 { listeners = this.listeners[ type ] = []; }
 		if( ! Array.isArray( listeners )) { listeners = this.listeners[ type ] = []; }
 
 		// Avoid redundant registrations
@@ -75,7 +75,7 @@ PilseungFighter.EventServer = class PSFEventServer extends PilseungFighter.Event
 	
 	unregister( type, listener ) {
 		let listeners = this.listeners?.[ type ];
-		if( ! defined( listeners )) { return; }
+		if( ! listeners ) { return; }
 
 		if( ! Array.isArray( listeners )) {
 			let name = listener.constructor.name;
@@ -91,7 +91,7 @@ PilseungFighter.EventServer = class PSFEventServer extends PilseungFighter.Event
 
 	trigger( type, message = null, source = null ) {
 		let listeners = this.listeners?.[ type ];
-		if( ! defined( listeners )) {
+		if( ! listeners ) {
 			let name = source.constructor.name;
 			console.log( `No listeners for event ${type} from ${name}`, message );
 			return;

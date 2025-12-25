@@ -4,7 +4,7 @@
 # Devel Tools
 # ============================================================
 apt-get update
-apt-get install -y sudo vim zip libssl-dev cpanminus
+apt-get install -y sudo vim zip libssl-dev cpanminus sqlite3 libsqlite3-dev
 
 cpanm install \
 	Carp \

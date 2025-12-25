@@ -11,7 +11,7 @@ use Try::Tiny;
 
 our $json   = (new JSON::XS())->boolean_values( 0, 1 );
 our $server = new PSF::Server();
-our $DEBUG  = 0;
+our $DEBUG  = 1;
 
 # ------------------------------------------------------------
 # MANAGE RINGS, DIVISIONS, AND ATHLETES VIA WEBSOCKETS

@@ -19,6 +19,7 @@ use PSF::Server::Comms::Client;
 use PSF::Server::Comms::Division;
 use PSF::Server::Comms::Match;
 use PSF::Server::Comms::Ring;
+use PSF::Server::Comms::Tournament;
 use PSF::Server::Comms::Server;
 
 our $DEBUG = 1;
@@ -35,18 +36,19 @@ sub new {
 # ============================================================
 sub init {
 # ============================================================
-	my $self               = shift;
-	$self->{ _config }     = new PSF::Config();
-	$self->{ _registery }  = new PSF::Client::Registry();
-	$self->{ _comms }      = new PSF::Server::Comms( $self );
-	$self->{ _json }       = (new JSON::XS())->boolean_values( 0, 1 );
+	my $self              = shift;
+	$self->{ _config }    = new PSF::Config();
+	$self->{ _registry }  = new PSF::Client::Registry();
+	$self->{ _comms }     = new PSF::Server::Comms( $self );
+	$self->{ _json }      = (new JSON::XS())->boolean_values( 0, 1 );
 
 	# ===== SERVER COMMS PROTOCOL OBJECTS (SCPOs)
-	$self->{ client }      = new PSF::Server::Comms::Client( $self );
-	$self->{ division }    = new PSF::Server::Comms::Division( $self );
-	$self->{ match }       = new PSF::Server::Comms::Match( $self );
-	$self->{ ring }        = new PSF::Server::Comms::Ring( $self );
-	$self->{ server }      = new PSF::Server::Comms::Server( $self );
+	$self->{ client }     = new PSF::Server::Comms::Client( $self );
+	$self->{ division }   = new PSF::Server::Comms::Division( $self );
+	$self->{ match }      = new PSF::Server::Comms::Match( $self );
+	$self->{ ring }       = new PSF::Server::Comms::Ring( $self );
+	$self->{ server }     = new PSF::Server::Comms::Server( $self );
+	$self->{ tournament } = new PSF::Server::Comms::Tournament( $self );
 
 }
 
@@ -109,7 +111,7 @@ sub handle {
 	my $client   = $self->registry->client( $cid );
 
 	die "Server Error: Subject $subject not defined $!" unless exists $self->{ $subject };
-	die "Server Error: Subject $subject does not implement Server Comms Protocol $!" unless( ref( $self->{ $subject }) && ref $self eq 'PSF::Server::Comms::Protocol' );
+	die "Server Error: Subject $subject does not implement Server Comms Protocol $!" unless( ref( $self->{ $subject }) && $self->{ $subject }->isa( 'PSF::Server::Comms::Protocol' ));
 
 	my $scpo = $self->{ $subject }; # Server Comms Protocol Object
 

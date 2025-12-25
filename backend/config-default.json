@@ -1,0 +1,8 @@
+{
+	"protocol" : "http://",
+	"host" : "localhost",
+	"port" : {
+		"psf" : 3030,
+		"webserver" : 8037
+	}
+}

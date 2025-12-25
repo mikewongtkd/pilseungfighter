@@ -2,13 +2,14 @@ package PSF::Class::Contestant;
 use lib qw( /usr/local/psf/lib );
 use base qw( PSF::DBO );
 our $defaults = {
-	name   => undef,
-	gender => undef,
-	dob    => undef,
-	weight => undef,
-	rank   => 'black',
-	team   => undef,
-	seed   => 0.0
+	tournament => undef,
+	name       => undef,
+	gender     => undef,
+	dob        => undef,
+	weight     => undef,
+	rank       => 'black',
+	team       => undef,
+	seed       => 0.0
 };
 
 # ============================================================

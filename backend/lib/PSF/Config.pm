@@ -47,11 +47,12 @@ sub init {
 sub host {
 # ============================================================
 	my $self = shift;
-	if( $self->{ port }) {
-		my $port = int( $self->{ port });
+	if( $self->{ port }{ webserver }) {
+		my $port     = int( $self->{ port }{ webserver });
+		my $protocol = exists $self->{ protocol } ? $self->{ protocol } : 'http://';
 		if   ( $port == 80 )  { return "http://$self->{ host }"; } 
 		elsif( $port == 443 ) { return "https://$self->{ host }"; } 
-		else                  { return "http://$self->{ host }:$self->{ port }"; }
+		else                  { return "$protocol$self->{ host }:$self->{ port }{ webserver }"; }
 	} else {
 		return $self->{ host };
 	}

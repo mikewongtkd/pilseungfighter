@@ -28,14 +28,9 @@ PilseungFighter.Comms = class PSFComms {
 		this.table[ type ][ action ] = handler;
 	}
 
-	command( action ) {
-		this.context.action.push( action );
-		return this;
-	}
-
 	dispatch( type, action, update ) {
 		// Ignore if there's no handler
-		if( ! defined( this.table?.[ type ]?.[ action ])) { 
+		if( ! this.table?.[ type ]?.[ action ]) { 
 			if( this.debug > 1 && type != 'server' && action != 'ping' ) {
 				console.log( `[...${this.listener?.id?.substring( 32 )}] ${this.listener.constructor.name} is ignoring a ${type} ${action} network message`, update );
 			}
@@ -43,9 +38,9 @@ PilseungFighter.Comms = class PSFComms {
 		}
 
 		// Record the message
-		if( ! defined( this.log?.[ type ])) { this.log[ type ] = {}; }
-		if( ! defined( this.log?.[ type ]?.[ action ])) { this.log[ type ][ action ] = []; }
-		if( update?.request && ! defined( this.log?.[ type ]?.[ action ])) { this.log[ type ][ action ].push( update.request ); }
+		if( ! this.log?.[ type ]) { this.log[ type ] = {}; }
+		if( ! this.log?.[ type ]?.[ action ]) { this.log[ type ][ action ] = []; }
+		if( update?.request && ! this.log?.[ type ]?.[ action ]) { this.log[ type ][ action ].push( update.request ); }
 
 		// Execute handler from the dispatch table
 		if( this.debug > 1 && type != 'server' && action != 'ping' ) {
@@ -55,7 +50,7 @@ PilseungFighter.Comms = class PSFComms {
 	}
 
 	heard( type ) {
-		if( ! defined( this.table?.[ type ])) {
+		if( !  this.table?.[ type ]) {
 			this.table[ type ] = {};
 		}
 		this.context.type = type;
@@ -75,6 +70,10 @@ PilseungFighter.Comms = class PSFComms {
 		return this;
 	}
 
+	response( action ) {
+		this.context.action.push( action );
+		return this;
+	}
 };
 
 PilseungFighter.WebSocket = class PSFWebSocket {
@@ -151,11 +150,11 @@ PilseungFighter.WebSocket = class PSFWebSocket {
 		this.ws.close();
 	}
 
-	handle( update ) {
-		let type   = update?.type;
-		let action = update?.action;
-		this.comms.dispatch( type, action, update );
-		this.listeners.forEach( listener => listener.comms.dispatch( type, action, update ));
+	handle( response ) {
+		let type   = response?.type;
+		let action = response?.request?.action;
+		this.comms.dispatch( type, action, response );
+		this.listeners.forEach( listener => listener.comms.dispatch( type, action, response ));
 	}
 
 	reconnect( url ) {
