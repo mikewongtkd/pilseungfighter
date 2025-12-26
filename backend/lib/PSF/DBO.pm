@@ -68,6 +68,7 @@ sub new {
 
 	}
 
+	return unless defined $self;
 	$self->write();
 	return $self;
 }
@@ -231,7 +232,6 @@ sub list {
 	while( my $row = $sth->fetchrow_hashref()) {
 		$row->{ data } = $json->decode( $row->{ data });
 		push @rows, bless $row, "PSF::Class::$class";
-		print STDERR $rows[ -1 ]->json(); # MW
 	}
 	return @rows;
 }
@@ -336,6 +336,7 @@ sub set {
 	$key = noun( $key )->is_plural ? noun( $key )->singular : $key;
 
 	$self->{ data }{ $key } = $value;
+	return unless defined $self;
 	$self->write();
 	return $value;
 }
