@@ -35,14 +35,14 @@
       .heard( 'ring' )
         .response( 'list' ).respond( update => {
           if( update?.rings && update.rings.length > 0 ) {
-            let rings = [{ id: 'staging', name: 'Staging' }];
-            for( let i = 1; i <= 6; i++ ) { rings.push({ id: i, name: `Ring ${i}` }); }
+            let rings = [ 'staging' ];
+            for( let i = 1; i <= 6; i++ ) { rings.push( i ); }
+            rings = rings.map( ringid => PilseungFighter.Ring.volatile( ringid ));
             $( '.btn-group-ring-select' ).empty();
             rings.forEach( ring => {
               let button = $( `<button type="button" class="btn btn-secondary" data-ring-id="${ring.id}">${ring.name}</button>` );
               button.off( 'click' ).click( ev => {
-                let message = { subject: 'ring', action: 'write', ring: { id: ring.id }};
-                app.network.send( message );
+                app.network.send( ring.message.create() );
               });
               $( '.btn-group-ring-select' ).append( button );
             });
@@ -59,15 +59,14 @@
           } else {
             $( '.section-ring-select' ).hide();
             $( '.section-ring-remove' ).hide();
-            let message = { subject: 'ring', action: 'write', ring: { id: 'staging' }};
-            app.network.send( message );
+            let ring = PilseungFighter.Ring.volatile( 'staging' );
+            app.network.send( ring.message.create() );
           }
         })
         .response( 'write' ).respond( update => {
           let ring = new PilseungFighter.Ring( update.ring );
           app.alertify.success( `${ring.name} opened` );
-          let message = { subject: 'ring', action: 'list' };
-          app.network.send( message );
+          app.network.send( ring.message.list() );
         });
   </script>
 </html>
