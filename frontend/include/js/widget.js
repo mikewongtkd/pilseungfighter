@@ -33,7 +33,7 @@ PilseungFighter.Widget = class PSFWidget {
 		};
 		this.network  = {
 			on : {
-				heard : type => { return this.comms.heard( type ); }
+				heard : subject => { return this.comms.heard( subject ); }
 			},
 			send : message => { return this.app.network.send( message ); }
 		};
@@ -44,8 +44,8 @@ PilseungFighter.Widget = class PSFWidget {
 		network.register( this );
 	}
 
-	heard( type ) {
-		return this._app.network.comms.heard( type );
+	heard( subject ) {
+		return this._app.network.comms.heard( subject );
 	}
 
 	restore() {

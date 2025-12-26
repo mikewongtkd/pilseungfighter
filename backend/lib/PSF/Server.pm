@@ -94,7 +94,7 @@ sub client_health_check {
 
 	return unless $ring ne 'staging' && $group->changed();
 
-	my $response = { subject => 'client', ring => $ring };
+	my $response = { subject => 'client', ringid => $ring };
 	$self->send->group( $response );
 }
 
@@ -128,7 +128,7 @@ sub handle_match_update {
 
 	print STDERR "$user message.\n" if $DEBUG;
 
-	my $response = { type => 'division', action => 'update', ring => $ring, division => $division, request => $request };
+	my $response = { type => 'division', action => 'update', ringid => $ring, division => $division, request => $request };
 	$self->send->group( $response );
 }
 

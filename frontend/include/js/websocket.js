@@ -1,6 +1,6 @@
 PilseungFighter.Comms = class PSFComms {
 	constructor( listener, websocket ) {
-		this.context   = { type : null, action : []};
+		this.context   = { subject : null, action : []};
 		this.table     = {}; // Dispatch table
 		this.listener  = listener;
 		this.websocket = websocket;
@@ -9,13 +9,13 @@ PilseungFighter.Comms = class PSFComms {
 		this.debug     = 1; // 0 to disable, 1 for basic information, 2 for more detailed information
 	}
 
-	add( type, action = null, handler = null ) {
-		this.heard( type );
+	add( subject, action = null, handler = null ) {
+		this.heard( subject );
 		if( action === null ) {
 			action = 'update';
 			handler = update => {
 				try {
-					this.dispatch( type, action, update );
+					this.dispatch( subject, action, update );
 				} catch( error ) {
 
 					this._catch( error );
@@ -25,47 +25,47 @@ PilseungFighter.Comms = class PSFComms {
 		} else if( handler === null ) {
 			handler = update => {};
 		}
-		this.table[ type ][ action ] = handler;
+		this.table[ subject ][ action ] = handler;
 	}
 
-	dispatch( type, action, update ) {
+	dispatch( subject, action, update ) {
 		// Ignore if there's no handler
-		if( ! this.table?.[ type ]?.[ action ]) { 
-			if( this.debug > 1 && type != 'server' && action != 'ping' ) {
-				console.log( `[...${this.listener?.id?.substring( 32 )}] ${this.listener.constructor.name} is ignoring a ${type} ${action} network message`, update );
+		if( ! this.table?.[ subject ]?.[ action ]) { 
+			if( this.debug > 1 && subject != 'server' && action != 'ping' ) {
+				console.log( `[...${this.listener?.id?.substring( 32 )}] ${this.listener.constructor.name} is ignoring a ${subject} ${action} network message`, update );
 			}
 			return; 
 		}
 
 		// Record the message
-		if( ! this.log?.[ type ]) { this.log[ type ] = {}; }
-		if( ! this.log?.[ type ]?.[ action ]) { this.log[ type ][ action ] = []; }
-		if( update?.request && ! this.log?.[ type ]?.[ action ]) { this.log[ type ][ action ].push( update.request ); }
+		if( ! this.log?.[ subject ]) { this.log[ subject ] = {}; }
+		if( ! this.log?.[ subject ]?.[ action ]) { this.log[ subject ][ action ] = []; }
+		if( update?.request && ! this.log?.[ subject ]?.[ action ]) { this.log[ subject ][ action ].push( update.request ); }
 
 		// Execute handler from the dispatch table
-		if( this.debug > 1 && type != 'server' && action != 'ping' ) {
-			console.log( `[...${this.listener?.id?.substring( 32 )}] ${this.listener.constructor.name} is processing a ${type} ${action} network message` );
+		if( this.debug > 1 && subject != 'server' && action != 'ping' ) {
+			console.log( `[...${this.listener?.id?.substring( 32 )}] ${this.listener.constructor.name} is processing a ${subject} ${action} network message` );
 		}
-		this.table[ type ][ action ]( update );
+		this.table[ subject ][ action ]( update );
 	}
 
-	heard( type ) {
-		if( !  this.table?.[ type ]) {
-			this.table[ type ] = {};
+	heard( subject ) {
+		if( !  this.table?.[ subject ]) {
+			this.table[ subject ] = {};
 		}
-		this.context.type = type;
+		this.context.subject = subject;
 		return this;
 	}
 
 	pass() {
 		let handler = update => {};
-		this.context.action.forEach( action => this.add( this.context.type, action, handler ));
+		this.context.action.forEach( action => this.add( this.context.subject, action, handler ));
 		this.context.action = [];
 		return this;
 	}
 	
 	respond( handler ) {
-		this.context.action.forEach( action => this.add( this.context.type, action, handler ));
+		this.context.action.forEach( action => this.add( this.context.subject, action, handler ));
 		this.context.action = [];
 		return this;
 	}
@@ -92,11 +92,11 @@ PilseungFighter.WebSocket = class PSFWebSocket {
 			},
 			message: response => { 
 				let update  = JSON.parse( response.data );
-				let type    = update.type;
+				let subject = update.subject;
 				let action  = update?.request?.action;
 				let request = update?.request;
 
-				if( this.comms.debug > 0 && ! (type == 'server' && action == 'ping' )) {
+				if( this.comms.debug > 0 && ! (subject == 'server' && action == 'ping' )) {
 					console.log( 'NETWORK MESSAGE', update );
 				}
 
@@ -119,8 +119,8 @@ PilseungFighter.WebSocket = class PSFWebSocket {
 				}
 
 				try {
-					this.comms.dispatch( type, action, update );
-					this.listeners.forEach( listener => listener.comms.dispatch( type, action, update ));
+					this.comms.dispatch( subject, action, update );
+					this.listeners.forEach( listener => listener.comms.dispatch( subject, action, update ));
 				} catch( error ) {
 					this.comms._catch( error );
 				}
@@ -136,8 +136,8 @@ PilseungFighter.WebSocket = class PSFWebSocket {
 		this.ws.onopen    = this.network.open;
 		this.ws.onmessage = this.network.message;
 		this.on           = {
-			heard : type => {
-				return this.comms.heard( type );
+			heard : subject => {
+				return this.comms.heard( subject );
 			}
 		};
 	}
@@ -151,10 +151,10 @@ PilseungFighter.WebSocket = class PSFWebSocket {
 	}
 
 	handle( response ) {
-		let type   = response?.type;
-		let action = response?.request?.action;
-		this.comms.dispatch( type, action, response );
-		this.listeners.forEach( listener => listener.comms.dispatch( type, action, response ));
+		let subject = response?.subject;
+		let action  = response?.request?.action;
+		this.comms.dispatch( subject, action, response );
+		this.listeners.forEach( listener => listener.comms.dispatch( subject, action, response ));
 	}
 
 	reconnect( url ) {

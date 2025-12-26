@@ -41,7 +41,7 @@ websocket '/:ring/:role' => sub {
 			}
 		}
 
-		$request->{ ring } = $rnum;
+		$request->{ ringid } = $rnum;
 		$request->{ from } = $client->cid();
 
 		# ===== HANDLE REQUEST
@@ -61,7 +61,7 @@ websocket '/:ring/:role' => sub {
 	# ----------------------------------------
 	$self->on( finish => sub { 
 		my $request  = { subject => 'client', action => 'disconnect', from => $server->id(), ring => $rnum };
-		my $response = { subject => 'client', ring => $rnum, client => { sessid => $client->sessid(), id => $client->id(), role => $client->role() }, request => $request };
+		my $response = { subject => 'client', ringid => $rnum, client => { sessid => $client->sessid(), id => $client->id(), role => $client->role() }, request => $request };
 		$client->ping->quit();
 		$server->send->group( $response );
 		$server->registry->remove( $client );

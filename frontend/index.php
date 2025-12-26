@@ -31,6 +31,7 @@
     app.network.on
       .heard( 'ring' )
         .response( 'list' ).respond( update => {
+          console.log( 'UPDATE', update ); // MW
           if( update?.rings && update.rings.length > 0 ) {
             let rings = [ 'staging' ];
             for( let i = 1; i < 20; i++ ) { rings.push( i ); }
@@ -50,7 +51,6 @@
             $( '.section-ring-remove' ).hide();
             let message = { subject: 'ring', action: 'write', ring: { id: 'staging' }};
             app.network.send( message );
-            console.log( 'SENDING CREATE RING REQUEST', message ); // MW
           }
         })
         .response( 'write' ).respond( update => {

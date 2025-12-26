@@ -3,6 +3,7 @@ package PSF::Server::Comms::Ring;
 use lib qw( /usr/local/psf/lib );
 use base qw( PSF::Server::Comms::Protocol );
 use PSF::Class::Ring;
+use JSON::XS; # MW
 
 # ============================================================
 sub _factory {
@@ -10,12 +11,16 @@ sub _factory {
 	my $self    = shift;
 	my $request = shift;
 	my $subject = $self->_subject();
+	my $values  = exists $request->{ $subject } ? $request->{ $subject } : {};
+	my $json = new JSON::XS(); # MW
 
-	if( exists $request->{ $subject }{ uuid }) {
-		my $uuid = $request->{ $subject }{ uuid };
+	print STDERR "Received factory request " . $json->canonical->pretty->encode( $request ) . "\n"; # MW
+
+	if( exists $values->{ uuid }) {
+		my $uuid = $values->{ uuid };
 		return new PSF::Class::Ring( $uuid );
 	} else {
-		return new PSF::Class::Ring();
+		return new PSF::Class::Ring( %$values );
 	}
 }
 

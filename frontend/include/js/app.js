@@ -29,7 +29,7 @@ PilseungFighter.App = class PSFApp {
 
 		// Server Ping behavior
 		this.ping = {};
-		this.ping.off = () => { this.network.comms?.heard( 'server' ).command( 'ping' ).respond(() => { this.network.send({ type : 'server', action : 'stop ping', ring }); }); }
+		this.ping.off = () => { this.network.comms?.heard( 'server' ).command( 'ping' ).respond(() => { this.network.send({ subject : 'server', action : 'stop ping', ring }); }); }
 		this.ping.on  = () => {
 			this.network.comms.add( 'server', 'ping', ping => {
 				let timestamp = Math.floor( Date.now() / 1000 );

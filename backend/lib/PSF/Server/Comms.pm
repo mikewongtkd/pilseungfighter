@@ -54,7 +54,7 @@ sub group {
 	my $response    = shift;
 	my $request     = $response->{ request };
 	my $cid         = $request->{ from };
-	my $ring        = $request->{ ring };
+	my $ring        = $request->{ ringid };
 	my $registry    = $self->server->registry();
 	my $from_server = defined( $cid ) && $cid == 0;
 	my $client      = $from_server ? undef : $registry->client( $cid ); die "Client '$cid' not found $!" unless ($client || $from_server);

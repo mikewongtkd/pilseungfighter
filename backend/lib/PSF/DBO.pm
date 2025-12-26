@@ -219,7 +219,7 @@ sub list {
 	my @rows = ();
 	while( my $row = $sth->fetchrow_hashref()) {
 		my $uuid = $row->{ uuid };
-		push @rows, "PSF::$class"->new( $uuid );
+		push @rows, "PSF::Class::$class"->new( $uuid );
 	}
 	return @rows;
 }
@@ -317,7 +317,7 @@ sub search {
 	my @rows = ();
 	while( my $row = $sth->fetchrow_hashref()) {
 		my $uuid = $row->{ uuid };
-		push @rows, "PSF::$class"->new( $uuid );
+		push @rows, "PSF::Class::$class"->new( $uuid );
 	}
 	return @rows;
 }

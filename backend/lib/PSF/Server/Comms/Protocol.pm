@@ -93,12 +93,6 @@ sub write {
 	my $subject  = $self->_subject();
 	my $instance = $self->_factory( $request );
 
-	foreach my $key (keys %$update) {
-		next if $key eq 'uuid';
-		my $value = $args{ $key };
-		$instance->set( $key, $value );
-	}
-
 	my $response = { request => $request, subject => $subject, $subject => $instance->document() };
 	$self->send->group( $response );
 }
