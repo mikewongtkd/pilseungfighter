@@ -97,6 +97,13 @@ PilseungFighter.WebSocket = class PSFWebSocket {
 				let request = update?.request;
 
 				if( this.comms.debug > 0 && ! (subject == 'server' && action == 'ping' )) {
+					if( update?.error ) {
+						console.log( 'SERVER ERROR', update );
+						if( this.listener?.alertify && this.listener?.debug ) {
+							this.listener.alertify.error( update.error );
+						}
+						return;
+					}
 					console.log( 'NETWORK MESSAGE', update );
 				}
 

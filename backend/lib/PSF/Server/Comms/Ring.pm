@@ -12,9 +12,6 @@ sub _factory {
 	my $request = shift;
 	my $subject = $self->_subject();
 	my $values  = exists $request->{ $subject } ? $request->{ $subject } : {};
-	my $json = new JSON::XS(); # MW
-
-	print STDERR "Received factory request " . $json->canonical->pretty->encode( $request ) . "\n"; # MW
 
 	if( exists $values->{ uuid }) {
 		my $uuid = $values->{ uuid };

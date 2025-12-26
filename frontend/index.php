@@ -34,21 +34,26 @@
     app.network.on
       .heard( 'ring' )
         .response( 'list' ).respond( update => {
-          console.log( 'UPDATE', update ); // MW
           if( update?.rings && update.rings.length > 0 ) {
-            let rings = [ 'staging' ];
-            for( let i = 1; i < 20; i++ ) { rings.push( i ); }
+            let rings = [{ id: 'staging', name: 'Staging' }];
+            for( let i = 1; i <= 6; i++ ) { rings.push({ id: i, name: `Ring ${i}` }); }
             $( '.btn-group-ring-select' ).empty();
             rings.forEach( ring => {
-              let button = $( `<button type="button" class="btn btn-secondary" data-ring-id="${ring}">${ring}</button>` );
+              let button = $( `<button type="button" class="btn btn-secondary" data-ring-id="${ring.id}">${ring.name}</button>` );
+              button.off( 'click' ).click( ev => {
+                let message = { subject: 'ring', action: 'write', ring: { id: ring.id }};
+                app.network.send( message );
+              });
               $( '.btn-group-ring-select' ).append( button );
             });
 
             update.rings.forEach( rdata => {
               let ring   = new PilseungFighter.Ring( rdata );
-              console.log( 'RING', ring.id ); // MW
               let button = $( '.btn-group-ring-select' ).find( `button[data-ring-id="${ring.id}"]` );
-              button.removeClass( 'btn-secondary' ).addClass( 'btn-primary' );
+              button.removeClass( 'btn-secondary' ).addClass( 'btn-primary' ).off( 'click' ).click( ev => {
+                app.sound.next.play();
+                app.alertify.notify( `${ring.name} selected.` );
+              });
             });
 
           } else {
@@ -59,9 +64,8 @@
           }
         })
         .response( 'write' ).respond( update => {
-          let rnum  = update?.ring?.id;
-          let rname = rnum == 'staging' ? 'Staging' : `Ring ${rnum}`;
-          app.alertify.success( `${rname} opened` );
+          let ring = new PilseungFighter.Ring( update.ring );
+          app.alertify.success( `${ring.name} opened` );
           let message = { subject: 'ring', action: 'list' };
           app.network.send( message );
         });

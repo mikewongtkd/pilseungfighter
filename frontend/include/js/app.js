@@ -4,6 +4,7 @@ PilseungFighter.App = class PSFApp {
 		this._ring     = ring;
 		this._alertify = alertify;
 		this._button   = {};
+		this._debug    = false;
 		this._display  = {};
 		this._input    = {};
 		this._modal    = {};
@@ -63,6 +64,7 @@ PilseungFighter.App = class PSFApp {
 
 	get alertify() { return this._alertify; }
 	get button()   { return this._button; }
+	get debug()    { return this._debug; }
 	get display()  { return this._display; }
 	get event()    { return this._event; }
 	get id()       { return this._id; }
@@ -79,6 +81,7 @@ PilseungFighter.App = class PSFApp {
 
 	// App caches for general UI/UX usage
 	set button( value )  { this._button  = value; } // For button behavior
+	set debug( value )   { this._debug   = value; } // value := true|false
 	set display( value ) { this._display = value; } // To reference general display components
 	set input( value )   { this._input   = value; } // For input behavior
 	set page( value )    { this._page    = value; } // For multipaged apps
