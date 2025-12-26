@@ -19,7 +19,7 @@ our $statement = {
 	delete     => "update document set deleted = datetime( 'now' ) where uuid=? and deleted is null",
 	exists     => 'select count(*) > 0 from document where uuid=? and deleted is null',
 	get        => 'select * from document where uuid=? and deleted is null',
-	list       => 'select * from document where deleted is null',
+	list       => 'select class, uuid, data from document where deleted is null',
 	insert     => 'insert into document (uuid, class, data) values (?, ?, ?)',
 	now        => "update document json_set( data, ?, datetime( 'now' )) where uuid = ? and deleted is null",
 	references => "select * from document where upper( class ) like :class and case when :column = :uuid or :column like '[%:uuid%]' and deleted is null",
@@ -208,6 +208,16 @@ sub get {
 }
 
 # ============================================================
+sub json {
+# ============================================================
+	my $self     = shift;
+	my $json     = new JSON::XS();
+	my $document = $self->document();
+
+	return $json->canonical->encode( $document );
+}
+
+# ============================================================
 sub list {
 # ============================================================
 	my $class = _class( shift );
@@ -217,21 +227,13 @@ sub list {
 	my $sth = _prepared_statement( 'list' );
 	$sth->execute();
 	my @rows = ();
+	my $json = new JSON::XS();
 	while( my $row = $sth->fetchrow_hashref()) {
-		my $uuid = $row->{ uuid };
-		push @rows, "PSF::Class::$class"->new( $uuid );
+		$row->{ data } = $json->decode( $row->{ data });
+		push @rows, bless $row, "PSF::Class::$class";
+		print STDERR $rows[ -1 ]->json(); # MW
 	}
 	return @rows;
-}
-
-# ============================================================
-sub json {
-# ============================================================
-	my $self     = shift;
-	my $json     = new JSON::XS();
-	my $document = $self->document();
-
-	return $json->canonical->encode( $document );
 }
 
 # ============================================================

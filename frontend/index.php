@@ -1,8 +1,10 @@
 <?php
   include_once( 'include/php/session.php' );
   include_once( 'include/php/app.php' );
+  include_once( 'include/php/psfclasses.php' );
 
   $afw   = new AppFramework();
+  $psfc  = new PSFClasses([ 'ring' ]);
   $comms = $afw->websocket();
 ?>
 <!DOCTYPE html>
@@ -24,6 +26,7 @@
     </div>
   </body>
   <?= $afw->scripts() ?>
+  <?= $psfc->scripts() ?>
   <script>
     let app = new PilseungFighter.App( 'staging' );
     app.on.connect( "<?= $comms ?>" ).list.ring();
@@ -41,8 +44,10 @@
               $( '.btn-group-ring-select' ).append( button );
             });
 
-            update.rings.forEach( ring => {
-              let button = $( '.btn-group-ring-select' ).find( `button[data-ring-id="${ring}"]` );
+            update.rings.forEach( rdata => {
+              let ring   = new PilseungFighter.Ring( rdata );
+              console.log( 'RING', ring.id ); // MW
+              let button = $( '.btn-group-ring-select' ).find( `button[data-ring-id="${ring.id}"]` );
               button.removeClass( 'btn-secondary' ).addClass( 'btn-primary' );
             });
 

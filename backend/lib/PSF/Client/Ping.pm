@@ -166,7 +166,7 @@ sub start {
 		my $now = time();
 		$self->{ pings }{ $now } = 1;
 
-		my $ping = { type => 'server', action => 'ping', ring => $client->ring(), cid => $client->cid(), gid => $client->gid(), role => $client->role(), server => { timestamp => $now }};
+		my $ping = { subject => 'user', action => 'ping', ringid => $client->ring(), cid => $client->cid(), gid => $client->gid(), role => $client->role(), server => { timestamp => $now }};
 		$ws->send({ json => $ping });
 	});
 }

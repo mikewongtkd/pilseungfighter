@@ -38,7 +38,7 @@ sub list {
 # ============================================================
 	my $self     = shift;
 	my $request  = shift;
-	my @rows     = $self->_list();
+	my @rows     = map { $_->document() } $self->_list();
 	my $subject  = $self->_subject();
 	my $subjects = noun( $subject )->plural();
 
