@@ -133,14 +133,18 @@ sub _factory {
 # ============================================================
 	my $self    = shift;
 	my $request = shift;
-	my $subject = $self->_subject();
+	my $handler = {
+		uuid => sub {
+			my $uuid = shift;
+			return new PSF::Class::Match( $uuid );
+		},
+		values => {
+			my $values = shift;
+			return new PSF::Class::Match( %$values );
+		}
+	};
 
-	if( exists $request->{ $subject }{ uuid }) {
-		my $uuid = $request->{ $subject }{ uuid };
-		return new PSF::Class::Match( $uuid );
-	} else {
-		return new PSF::Class::Match();
-	}
+	return $self->SUPER::_factory( $request, $handler );
 }
 
 # ============================================================

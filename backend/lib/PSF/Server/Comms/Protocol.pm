@@ -22,6 +22,24 @@ sub init {
 }
 
 # ============================================================
+sub delete {
+# ============================================================
+	my $self    = shift;
+	my $request = shift;
+	my $subject = $self->_subject();
+
+	die "Response Error: No UUID specified for delete request $!" unless( exists $request->{ $subject });
+	my $uuid = $request->{ $subject };
+	die "Response Error: '$uuid' is not a valid UUID for delete request $!" unless( $uuid =~ /^[0-9A-Fa-f]{8}\-[0-9A-Fa-f]{4}\-[0-9A-Fa-f]{4}\-[0-9A-Fa-f]{4}\-[0-9A-Fa-f]{12}$/ );
+
+	my $instance = $self->_factory( $request );
+	my $response = { request => $request, subject => $subject, $subject => $instance->document() };
+	$instance->delete();
+
+	$self->send->group( $response );
+}
+
+# ============================================================
 sub first {
 # ============================================================
 	my $self     = shift;
@@ -51,12 +69,12 @@ sub read {
 # ============================================================
 	my $self    = shift;
 	my $request = shift;
+	my $subject = $self->_subject();
 
-	unless( exists $request->{ uuid }) {
-		die "Response Error: No UUID specified for read request $!";
-	}
+	die "Response Error: No UUID specified for read request $!" unless( exists $request->{ $subject });
+	my $uuid = $request->{ $subject };
+	die "Response Error: '$uuid' is not a valid UUID for read request $!" unless( $uuid =~ /^[0-9A-Fa-f]{8}\-[0-9A-Fa-f]{4}\-[0-9A-Fa-f]{4}\-[0-9A-Fa-f]{4}\-[0-9A-Fa-f]{12}$/ );
 
-	my $subject  = $self->_subject();
 	my $instance = $self->_factory( $request );
 	my $response = { request => $request, subject => $subject, $subject => $instance->document() };
 	$self->send->client( $response );
@@ -100,8 +118,18 @@ sub write {
 # ============================================================
 sub _factory {
 # ============================================================
-	my $self = shift;
-	return undef;
+	my $self     = shift;
+	my $request  = shift;
+	my $handler  = shift;
+	my $subject  = $self->_subject();
+	my $values   = exists $request->{ $subject } ? $request->{ $subject } : {};
+	my $uuid     = ref $values ? (exists $values->{ uuid } ? $values->{ uuid } : undef ) : $values;
+
+	if( $uuid ) {
+		return $handler->{ uuid }( $uuid );
+	} else {
+		return $handler->{ values }( $values );
+	}
 }
 
 # ============================================================

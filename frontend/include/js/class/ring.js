@@ -1,8 +1,15 @@
 PilseungFighter.Ring = class PSFRing extends PilseungFighter.Class {
-	static volatile( id ) {
-		let ring = new PilseungFighter.Ring();
-		ring.id = id;
-		return ring;
+	constructor( doc = null ) {
+		if( doc === null ) {
+			super();
+
+		} else if( typeof doc == 'number' || typeof doc == 'string' ) {
+			super();
+			this.id = doc;
+
+		} else if( typeof doc == 'object' ) {
+			super( doc );
+		}
 	}
 
 	get id() { return this._data?.id; }

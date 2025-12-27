@@ -9,14 +9,18 @@ sub _factory {
 # ============================================================
 	my $self    = shift;
 	my $request = shift;
-	my $subject = $self->_subject();
+	my $handler = {
+		uuid => sub {
+			my $uuid = shift;
+			return new PSF::Class::Division( $uuid );
+		},
+		values => {
+			my $values = shift;
+			return new PSF::Class::Division( %$values );
+		}
+	};
 
-	if( exists $request->{ $subject }{ uuid }) {
-		my $uuid = $request->{ $subject }{ uuid };
-		return new PSF::Class::Division( $uuid );
-	} else {
-		return new PSF::Class::Division();
-	}
+	return $self->SUPER::_factory( $request, $handler );
 }
 
 # ============================================================

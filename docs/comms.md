@@ -20,46 +20,67 @@ The server handles client requests by instantiating a *server comms protocol* ob
 		"subject" : client | contestant | division | match | ring | round,
 		"action" : read | write | delete | first | search | <subject action>,
 		"from" : <cid>, 
-		"ring" : <rnum>
+		"ringid" : <rnum>
 		...
 	}
 
-The fields `from` and `ring` are automatically supplied by the server. Server-sent requests have CID = 0 and the ring is set depending on circumstances.
+The fields `from` and `ringid` are automatically supplied by the server. Server-sent requests have CID = 0 and the ring is set depending on circumstances.
 
 #### Universal Requests
 
-All PSFCP objects are subclasses of the `PSF::Server::Comms::Protocol` class, which implements the following requests. All PSFCP classes must implement the `_subject()` and `_factory()` methods to enable these universal requests for each class.
+All PSFCP objects are subclasses of the `PSF::Server::Comms::Protocol` class, which implements the following requests. All PSFCP classes must implement the `_factory()`, `_list()`, `_search()`, and `_subject()` methods to enable these universal requests for each class.
+
+- `_factory()`: handles creating, updating, or retrieving `PSF::DBO` documents.
+- `_list()`: handles retrieving all `PSF::DBO` documents of the requested class.
+- `_search()`: handles retrieving `PSF::DBO` documents that meet the requested query specifications.
+- `_subject()`: returns the subject name for the requested class.
 
 ##### Create/Update
 
 Creates or updates a PSF object, as specified in `PSF::Server::Comms::Protocol`, which is the base class for all Comms classes.
 
+	"subject" : <subject>,
 	"action" : "write",
 	<subject> : { <subject parameters> }
 
-If `uuid` is not one of the `<subject parameters>`, then a new PSF object shall be created. Otherwise, the specified PSF object will be updated using the `<subject parameters>`.
+If `uuid` is not one of the `<subject parameters>`, then a new PSF object shall be created. Otherwise, the specified PSF object will be updated using the `<subject parameters>`. Response is broadcasted to all members of the group.
 
 ##### Delete
 
+	"subject" : <subject>,
 	"action" : "delete",
 	<subject> : <uuid>
+
+If `uuid` is not given in the `<subject>` field, then the request is invalid and an error is thrown. Otherwise, the specified PSF object will be soft-deleted from the database. Response is broadcasted to all members of the group.
 
 ##### First
 
 Retrieves one PSF object matching the specified parameters. Returns one object. If no object matches the criteria, then returns `null`.
 
+	"subject" : <subject>,
 	"action" : "get one",
 	<subject> : <subject parameters>
 
+##### List
+
+	"subject" : <subject>,
+	"action" : "list"
+
+Sends a list of all available subjects
+
 ##### Read
 
+	"subject" : <subject>,
 	"action" : "read",
 	<subject> : <uuid>
+
+If `uuid` is not given in the `<subject>` field, then the request is invalid and an error is thrown. Otherwise, the specified PSF object will be returned to the requesting client.
 
 ##### Search
 
 Retrieves one or more PSF objects matching the specified parameters. Returns an array of objects, an array with a single object, or an empty array.
 
+	"subject" : <subject>,
 	"action" : "get",
 	<subject> : <subject parameters>
 
