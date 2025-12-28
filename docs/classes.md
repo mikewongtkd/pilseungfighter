@@ -27,14 +27,8 @@
     {
         "clock" : <Clock>,
         "at" : <seconds:float>,
-        "action" : start | pause | resume | reset | set
-    }
-
-If the update has the action `set`, then the following two parameters are also required.
-
-    {
         "duration" : <seconds:float> | null,
-        "current" : <seconds:float> | null
+        "action" : start | pause | resume | reset | set
     }
 
 ## Contestant
@@ -61,9 +55,11 @@ If the update has the action `set`, then the following two parameters are also r
         "rank" : [ <rank:text>, ... ],
         "contestant" : [ <Contestant>, ... ],
         "pss" : <pss:boolean>,
-        "round_count" : <count:int>,
-        "round_duration" : <seconds:float>,
-        "rest_duration" : <seconds:float>,
+        "round" : { 
+            "count" : <count:int>, 
+            "duration" : <seconds:float>,
+            "rest" : <seconds:float>,
+        },
         "head_contact" : full | light | none,
         "notes" : <notes:text>
     }
@@ -71,11 +67,10 @@ If the update has the action `set`, then the following two parameters are also r
 ## Division::Round
 
     {
-        "name" : <name:text>,
         "code" : <code:text>,
         "order" : <order:int>,
         "division" : <Division>,
-        "contestant" : [ <Contestant> ]
+        "contestant" : [ <Contestant>, ... ]
     }
 
 ## Match

@@ -9,6 +9,9 @@ PilseungFighter.Ring = class PSFRing extends PilseungFighter.Class {
 
 		} else if( typeof doc == 'object' ) {
 			super( doc );
+
+		} else {
+			throw new Error( `Invalid parameter ${doc} when instatiating a PilseungFighter.Ring object.` );
 		}
 	}
 

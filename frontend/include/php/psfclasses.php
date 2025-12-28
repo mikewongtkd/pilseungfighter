@@ -7,6 +7,7 @@ class PSFClasses extends WebFramework {
 		'clock' => [ 'class' ],
 		'clockUpdate' => [ 'clock' ],
 		'division' => [ 'contestant' ],
+		'divisionRound' => [ 'contestant', 'division' ],
 		'judge' => [],
 		'match' => [ 'matchRound', 'ring', 'contestant', 'division' ],
 		'matchRound' => [ 'clock', 'score' ],

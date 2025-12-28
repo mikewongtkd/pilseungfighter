@@ -1,12 +1,16 @@
-PilseungFighter.Message = class PSFMessage {
+PilseungFighter.CommsMessage = class PSFCommsMessage {
 	constructor( parent ) {
 		this.parent = parent;
 	}
 
-	create() {
+	create( data = null ) {
 		let subject = this.subject;
 		let message = { subject, action: 'write' };
-		message[ subject ] = this.data;
+		if( data === null ) {
+			message[ subject ] = data;
+		} else {
+			message[ subject ] = this.data;
+		}
 		return message;
 	}
 
@@ -28,10 +32,14 @@ PilseungFighter.Message = class PSFMessage {
 		return { subject: this.subject, action: 'list' };
 	}
 
-	read() {
+	read( uuid = null ) {
 		let subject = this.subject;
 		let message = { subject, action: 'read' };
-		message[ subject ] = this.uuid;
+		if( uuid === null ) {
+			message[ subject ] = this.uuid;
+		} else {
+			message[ subject ] = uuid;
+		}
 		return message;
 	}
 
@@ -51,17 +59,24 @@ PilseungFighter.Message = class PSFMessage {
 	get uuid()    { return this.parent.uuid; }
 	get data()    { return this.parent.data; }
 	get subject() { return this.parent.subject; }
+
 };
 
 PilseungFighter.Class = class PSFClass {
 	constructor( instance = { 'class': null, uuid: null, data: {}} ) {
-		this._class   = instance.class;
-		this._uuid    = instance.uuid;
-		this._data    = instance.data;
-		this._message = new PilseungFighter.Message( this );
-	}
+		this._message = new PilseungFighter.CommsMessage( this );
 
-	static volatile() {
+		if( typeof instance == 'string' && PilseungFighter.isUUID( instance )) {
+			this._uuid = instance;
+
+		} else if( typeof instance == 'object' ) {
+			this._class   = instance.class;
+			this._uuid    = instance.uuid;
+			this._data    = instance.data;
+
+		} else {
+			throw new Error( `Invalid parameter ${instance} when instantiating a PilseungFighter.Class object` );
+		}
 	}
 
 	get class()   { return this._class; }
