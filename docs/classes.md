@@ -104,8 +104,9 @@
 ## Ring
 
     {
-        "name" : <name:text>,
-        "number" : <number:int>,
+        "id" : <ringid:int>,
+        "current" : <Division> | null,
+        "judges" : <jnum:int>
     }
 
 External references

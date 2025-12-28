@@ -43,19 +43,6 @@
     app.on.connect( "<?= $comms ?>" ).list.ring();
     app.state.judge = judge;
 
-    // BUTTON BEHAVIOR
-    $( '.btn-back-to-ring-select' ).off( 'click' ).click( ev => {
-      app.sound.prev.play();
-      app.state.ring = null;
-      $( '.section-role-select' ).hide();
-      $( '.section-ring-select' ).show();
-    });
-
-    $( '.btn-delete-ring' ).off( 'click' ).click( ev => {
-      let ring = app.state.ring;
-      app.network.send( ring.message.delete() );
-    });
-
     app.network.on
       .heard( 'match' )
         .response( 'read' ).respond( update => {

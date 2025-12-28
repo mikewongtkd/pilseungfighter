@@ -3,9 +3,12 @@ PilseungFighter.Ring = class PSFRing extends PilseungFighter.Class {
 		if( doc === null ) {
 			super();
 
-		} else if( typeof doc == 'number' || typeof doc == 'string' ) {
+		} else if( typeof doc == 'number' || doc == 'staging' ) {
 			super();
 			this.id = doc;
+
+		} else if( typeof doc == 'string' && PilseungFighter.isUUID( doc )) {
+			super( doc );
 
 		} else if( typeof doc == 'object' ) {
 			super( doc );
@@ -21,6 +24,8 @@ PilseungFighter.Ring = class PSFRing extends PilseungFighter.Class {
 		let ringid = parseInt( this.id );
 		if( ringid < 10 ) { return `ring0${ringid}`; } else { return `ring${ringid}`; }
 	}
+	get current() { return this._data?.current; }
+	get judges() { return this._data?.judges; }
 	get name() {
 		if( this.id == 'staging' ) { return 'Staging'; }
 		return `Ring ${this.id}`;
