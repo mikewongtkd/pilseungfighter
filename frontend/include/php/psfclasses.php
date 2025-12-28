@@ -3,7 +3,16 @@ include_once( __DIR__ . '/framework.php' );
 
 class PSFClasses extends WebFramework {
 	private const DEPENDENCIES = [
-		'ring' => [ 'class' ]
+		'contestant' => [ 'class' ],
+		'clock' => [ 'class' ],
+		'clockUpdate' => [ 'clock' ],
+		'division' => [ 'contestant' ],
+		'judge' => [],
+		'match' => [ 'matchRound', 'ring', 'contestant', 'division' ],
+		'matchRound' => [ 'clock', 'score' ],
+		'ring' => [ 'class' ],
+		'score' => [ 'contestant' ],
+		'scoreUpdate' => [ 'score' ]
 	];
 
 	public function __construct( $includes ) {

@@ -29,26 +29,9 @@
             <button type="button" class="btn btn-danger btn-delete-ring">Delete Ring</button>
           </div>
           <div class="btn-group-role-select btn-group col-6">
-            <button type="button" class="btn btn-success btn-judge-role" data-role="judge">Judge</button>
-            <button type="button" class="btn btn-info btn-select-role" data-role="operator">Computer Operator</button>
-            <button type="button" class="btn btn-primary btn-select-role" data-role="admin">Admin</button>
-          </div>
-        </div>
-      </section>
-      <section class="row section-judge-select" style="display: none;">
-        <h2>Select Judge Role</h2>
-        <div class="row">
-          <div class="col-2">
-            <button type="button" class="btn btn-warning btn-back-to-role-select">Back</button>
-          </div>
-          <div class="col-10">
-            <div class="btn-group-ring-action btn-group">
-              <button type="button" class="btn btn-primary btn-judge-select" data-judge="0">Referee</button>
-              <button type="button" class="btn btn-primary btn-judge-select" data-judge="1">Judge 1</button>
-              <button type="button" class="btn btn-primary btn-judge-select" data-judge="2">Judge 2</button>
-              <button type="button" class="btn btn-primary btn-judge-select" data-judge="3">Judge 3</button>
-              <button type="button" class="btn btn-primary btn-judge-select" data-judge="4">Judge 4</button>
-            </div>
+            <a class="btn btn-success" href="judge.php">Judge</a>
+            <a class="btn btn-info"    href="operator.php">Computer Operator</a>
+            <a class="btn btn-primary" href="admin.php">Admin</a>
           </div>
         </div>
       </section>
@@ -65,7 +48,6 @@
     $( '.btn-back-to-ring-select' ).off( 'click' ).click( ev => {
       app.sound.prev.play();
       app.state.ring = null;
-      $( '.section-judge-select' ).hide();
       $( '.section-role-select' ).hide();
       $( '.section-ring-select' ).show();
     });
@@ -73,35 +55,6 @@
     $( '.btn-delete-ring' ).off( 'click' ).click( ev => {
       let ring = app.state.ring;
       app.network.send( ring.message.delete() );
-    });
-
-    $( '.btn-select-role' ).off( 'click' ).click( ev => {
-      let target = $( ev.target );
-      let ring   = app.state.ring;
-      let role   = target.attr( 'data-role' );
-      window.location = `${role}.php?ring=${ring.id}`;
-    });
-
-    $( '.btn-back-to-role-select' ).off( 'click' ).click( ev => {
-      app.sound.prev.play();
-      app.state.ring = null;
-      $( '.section-judge-select' ).hide();
-      $( '.section-role-select' ).show();
-      $( '.section-ring-select' ).hide();
-    });
-
-    $( '.btn-judge-role' ).off( 'click' ).click( ev => {
-      app.sound.next.play();
-      $( '.section-judge-select' ).show();
-      $( '.section-role-select' ).hide();
-      $( '.section-ring-select' ).hide();
-    });
-
-    $( '.btn-judge-select' ).off( 'click' ).click( ev => {
-      let target = $( ev.target );
-      let ring   = app.state.ring;
-      let jid    = target.attr( 'data-judge' );
-      window.location = `judge.php?ring=${ring.id}&judge=${jid}`;
     });
 
     app.network.on
@@ -113,7 +66,6 @@
         })
         .response( 'list' ).respond( update => {
           app.state.ring = null;
-          $( '.section-judge-select' ).hide();
           $( '.section-role-select' ).hide();
           $( '.section-ring-select' ).show();
           // There are some rings; show them
@@ -137,7 +89,6 @@
                 app.sound.next.play();
                 app.state.ring = ring;
                 app.alertify.notify( `${ring.name} selected.` );
-                $( '.section-judge-select' ).hide();
                 $( '.section-ring-select' ).hide();
                 $( '.section-role-select' ).show();
                 $( '.section-role-select' ).find( 'h2' ).html( `Select a Role for ${ring.name}` );

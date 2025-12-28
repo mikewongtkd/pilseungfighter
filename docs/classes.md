@@ -133,7 +133,7 @@ External references
 
     {
         "score" : <Score>,
-        "from" : j1 | j2 | j3 | j4 | j5 | co | 0,
+        "from" : ref | j1 | j2 | j3 | j4 | co | 0,
         "to" : chung | hong,
         "presentation" : <presentation:float>,
         "technical" : <technical:float>,
@@ -142,7 +142,7 @@ External references
     }
 
 **co**: Computer Operator
-**ap**: Autopilot
+**0**: Server (e.g. `penalty_timer`)
 
 There are two scoring methods:
 
