@@ -8,6 +8,7 @@ use Mojolicious::Controller;
 use Mojo::IOLoop;
 use Statistics::Descriptive;
 use Try::Tiny;
+our $DEBUG = 0;
 
 # ============================================================
 sub new {
@@ -145,10 +146,8 @@ sub quit {
 	my $client = $self->{ client };
 	my $id     = $self->{ id };
 
-	return unless $id;
-
-	Mojo::IOLoop->remove( $id );
-	delete $self->{ id };
+	$self->stop();
+	print STDERR "Preventing future client pings (ping id: $id)\n" if $DEBUG;
 	delete $client->{ ping };
 }
 
@@ -162,13 +161,17 @@ sub start {
 
 	$self->{ interval } = $interval;
 
+	$self->stop();
+
 	$self->{ id } = Mojo::IOLoop->recurring( $interval => sub ( $ioloop ) {
 		my $now = time();
 		$self->{ pings }{ $now } = 1;
 
-		my $ping = { subject => 'user', action => 'ping', ringid => $client->ring(), cid => $client->cid(), gid => $client->gid(), role => $client->role(), server => { timestamp => $now }};
+		my $ping = { subject => 'client', request => { from => 0, action => 'ping' }, ringid => $client->ring(), cid => $client->cid(), gid => $client->gid(), role => $client->role(), server => { timestamp => $now }};
 		$ws->send({ json => $ping });
 	});
+
+	print STDERR "Starting client ping (ping id: $self->{ id })\n" if $DEBUG;
 }
 
 # ============================================================
@@ -178,6 +181,7 @@ sub stop {
 	my $id     = $self->{ id };
 
 	return unless $id;
+	print STDERR "Stopping client ping (ping id: $self->{ id })\n" if $DEBUG;
 
 	Mojo::IOLoop->remove( $id );
 	delete $self->{ id };

@@ -16,38 +16,39 @@
   <body>
     <div class="container">
       <h1>Pilseung Fighter</h1>
-      <section class="row section-ring-select">
-        <h2>Select a Ring</h2>
-        <div class="btn-group-ring-select btn-group">
-        </div>
-      </section>
-      <section class="row section-role-select" style="display: none;">
+      <section class="row section-role-select">
         <h2>Select a Role</h2>
-        <div class="row">
-          <div class="btn-group-ring-action btn-group col-6">
-            <button type="button" class="btn btn-warning btn-back-to-ring-select">Back</button>
-            <button type="button" class="btn btn-danger btn-delete-ring">Delete Ring</button>
-          </div>
-          <div class="btn-group-role-select btn-group col-6">
-            <button type="button" class="btn btn-success btn-judge-role" data-role="judge">Judge</button>
-            <button type="button" class="btn btn-info btn-select-role" data-role="operator">Computer Operator</button>
-            <button type="button" class="btn btn-primary btn-select-role" data-role="admin">Admin</button>
-          </div>
+        <div class="btn-group-role-select btn-group">
+          <button type="button" class="btn btn-success btn-judge-role" >Judge</button>
+          <button type="button" class="btn btn-info btn-operator-role" >Computer Operator</button>
+          <button type="button" class="btn btn-primary btn-admin-role" >Admin</button>
         </div>
       </section>
       <section class="row section-judge-select" style="display: none;">
         <h2>Select Judge Role</h2>
         <div class="row">
-          <div class="col-2">
+          <div class="col-1">
             <button type="button" class="btn btn-warning btn-back-to-role-select">Back</button>
           </div>
-          <div class="col-10">
+          <div class="col-11">
             <div class="btn-group-ring-action btn-group">
               <button type="button" class="btn btn-primary btn-judge-select" data-judge="0">Referee</button>
               <button type="button" class="btn btn-primary btn-judge-select" data-judge="1">Judge 1</button>
               <button type="button" class="btn btn-primary btn-judge-select" data-judge="2">Judge 2</button>
               <button type="button" class="btn btn-primary btn-judge-select" data-judge="3">Judge 3</button>
               <button type="button" class="btn btn-primary btn-judge-select" data-judge="4">Judge 4</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="row section-ring-select" style="display: none;">
+        <h2>Select a Ring</h2>
+        <div class="row">
+          <div class="col-1">
+            <button type="button" class="btn btn-warning btn-back-to-role-select">Back</button>
+          </div>
+          <div class="col-11">
+            <div class="btn-group-ring-select btn-group">
             </div>
           </div>
         </div>
@@ -59,27 +60,15 @@
   <script>
     let app = new PilseungFighter.App( 'staging' );
     app.on.connect( "<?= $comms ?>" ).list.ring();
-    app.state.ring = null;
+    app.state.ring = { id: 'staging' };
+    app.state.role = null;
 
     // BUTTON BEHAVIOR
-    $( '.btn-back-to-ring-select' ).off( 'click' ).click( ev => {
-      app.sound.prev.play();
-      app.state.ring = null;
-      $( '.section-judge-select' ).hide();
-      $( '.section-role-select' ).hide();
-      $( '.section-ring-select' ).show();
-    });
-
-    $( '.btn-delete-ring' ).off( 'click' ).click( ev => {
-      let ring = app.state.ring;
-      app.network.send( ring.message.delete() );
-    });
-
     $( '.btn-select-role' ).off( 'click' ).click( ev => {
       let target = $( ev.target );
       let ring   = app.state.ring;
       let role   = target.attr( 'data-role' );
-      window.location = `${role}.php?ring=${ring.id}`;
+      app.state.role = role;
     });
 
     $( '.btn-back-to-role-select' ).off( 'click' ).click( ev => {
@@ -97,25 +86,37 @@
       $( '.section-ring-select' ).hide();
     });
 
+    $( '.btn-operator-role' ).off( 'click' ).click( ev => {
+      app.sound.next.play();
+      app.state.role = 'operator';
+
+      $( '.section-judge-select' ).hide();
+      $( '.section-role-select' ).hide();
+      $( '.section-ring-select' ).show();
+    });
+
+    $( '.btn-admin-role' ).off( 'click' ).click( ev => {
+      window.location = `admin.php?ring=staging`;
+    });
+
     $( '.btn-judge-select' ).off( 'click' ).click( ev => {
-      let target = $( ev.target );
-      let ring   = app.state.ring;
-      let jid    = target.attr( 'data-judge' );
-      window.location = `judge.php?ring=${ring.id}&judge=${jid}`;
+      app.sound.next.play();
+      let target     = $( ev.target );
+      app.state.role = target.attr( 'data-judge' );
+
+      $( '.section-judge-select' ).hide();
+      $( '.section-role-select' ).hide();
+      $( '.section-ring-select' ).show();
+
     });
 
     app.network.on
       .heard( 'ring' )
-        .response( 'delete' ).respond( update => {
-          let ring = new PilseungFighter.Ring( update.ring );
-          app.network.send( ring.message.list() );
-          app.alertify.notify( `${ring.name} deleted` );
-        })
         .response( 'list' ).respond( update => {
           app.state.ring = null;
+          $( '.section-role-select' ).show();
           $( '.section-judge-select' ).hide();
-          $( '.section-role-select' ).hide();
-          $( '.section-ring-select' ).show();
+          $( '.section-ring-select' ).hide();
           // There are some rings; show them
           if( update?.rings && update.rings.length > 0 ) {
             let rings = [ 'staging' ];
@@ -124,9 +125,7 @@
             $( '.btn-group-ring-select' ).empty();
             rings.forEach( ring => {
               let button = $( `<button type="button" class="btn btn-secondary" data-ring-id="${ring.id}">${ring.name}</button>` );
-              button.off( 'click' ).click( ev => {
-                app.network.send( ring.message.create() );
-              });
+              button.off( 'click' );
               $( '.btn-group-ring-select' ).append( button );
             });
 
@@ -134,13 +133,14 @@
               let ring   = new PilseungFighter.Ring( rdata );
               let button = $( '.btn-group-ring-select' ).find( `button[data-ring-id="${ring.id}"]` );
               button.removeClass( 'btn-secondary' ).addClass( 'btn-primary' ).off( 'click' ).click( ev => {
-                app.sound.next.play();
                 app.state.ring = ring;
-                app.alertify.notify( `${ring.name} selected.` );
-                $( '.section-judge-select' ).hide();
-                $( '.section-ring-select' ).hide();
-                $( '.section-role-select' ).show();
-                $( '.section-role-select' ).find( 'h2' ).html( `Select a Role for ${ring.name}` );
+
+                if( app.state.role == 'operator' ) {
+                  window.location = `operator.php?ring=${app.state.ring.id}`;
+                } else {
+                  window.location = `judge.php?ring=${app.state.ring.id}&judge=${app.state.role}`;
+                }
+
               });
             });
 
@@ -157,4 +157,4 @@
         });
   </script>
 </html>
-<!-- vim: set nowrap ts=2 sw=2 expandtab -->
+<!-- vim: set nowrap ts=2 sw=2 expandtab : -->

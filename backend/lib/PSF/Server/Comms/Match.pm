@@ -17,21 +17,20 @@ sub init {
 # ============================================================
 sub penalty_timer {
 # ============================================================
-	my $self       = shift;
-	my $contestant = shift;
-	my $ptid       = shift;
+	my $self  = shift;
+	my $color = shift;
+	my $ptid  = shift || undef;
 
-	if( defined $ptid ) {
-		if( $ptid eq 'off' ) {
-			my $ptid = $self->{ $color }{ penalty_timer };
-			MOJO::IOLoop->remove( $ptid ) if defined( $ptid );
-			$self->{ $color }{ penalty_timer } = undef;
+	return $self->{ $color }{ penalty_timer } unless( defined $ptid );
 
-		} else {
-			$self->{ $color }{ penalty_timer } = $ptid;
-		}
+	if( $ptid eq 'off' ) {
+		$ptid = $self->{ $color }{ penalty_timer };
+		MOJO::IOLoop->remove( $ptid ) if defined( $ptid );
+		$self->{ $color }{ penalty_timer } = undef;
+
+	} else {
+		$self->{ $color }{ penalty_timer } = $ptid;
 	}
-	return $self->{ $color }{ penalty_timer };
 }
 
 # ============================================================
@@ -85,7 +84,7 @@ sub update_penalty_timer {
 	my $total  = $match->division->pss() ? 2.4 : 4.0; # Total deduction over the duration of the match
 	my $rate   = 0.1 * ($duration / $total ); # 0.1 points every $rate seconds
 	my $score  = $match->match_round->$color();
-	my $timer  = $score->penalty_timer();
+	my $timer  = $score->penalty_timer( $color );
 	my $action = $request->{ timer }{ action };
 	my $status = $timer->add_update( $action );
 
@@ -138,7 +137,7 @@ sub _factory {
 			my $uuid = shift;
 			return new PSF::Class::Match( $uuid );
 		},
-		values => {
+		values => sub {
 			my $values = shift;
 			return new PSF::Class::Match( %$values );
 		}

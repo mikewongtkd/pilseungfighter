@@ -14,7 +14,7 @@ sub _factory {
 			my $uuid = shift;
 			return new PSF::Class::Ring( $uuid );
 		},
-		values => {
+		values => sub {
 			my $values = shift;
 			return new PSF::Class::Ring( %$values );
 		}

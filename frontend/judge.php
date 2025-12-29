@@ -27,11 +27,15 @@
     <div class="container">
       <section class="section-judge-division-match-header">
       </section>
-      <section class="section-judge-chung-score">
+      <section class="score">
+        <div class="chung-score">
+        </div>
+        <div class="hong-score">
+        </div>
+        <div class="mean-score">
+        </div>
       </section>
-      <section class="section-judge-hong-score">
-      </section>
-      <section class="section-judge-mean-score">
+      <section class="score-controls">
       </section>
     </div>
   </body>
@@ -40,13 +44,14 @@
   <script>
     let judge = new PilseungFighter.Judge( <?= $jid ?> );
     let app = new PilseungFighter.App( <?= $ringid ?>, judge.code );
-    app.on.connect( "<?= $comms ?>" ).list.ring();
+    app.on.connect( "<?= $comms ?>" ).read.ring();
     app.state.judge = judge;
 
     app.network.on
-      .heard( 'match' )
+      .heard( 'ring' )
         .response( 'read' ).respond( update => {
+          console.log( 'RING', update ); // MW
         });
   </script>
 </html>
-<!-- vim: set nowrap ts=2 sw=2 expandtab -->
+<!-- vim: set nowrap ts=2 sw=2 expandtab : -->

@@ -31,7 +31,7 @@ PilseungFighter.Comms = class PSFComms {
 	dispatch( subject, action, update ) {
 		// Ignore if there's no handler
 		if( ! this.table?.[ subject ]?.[ action ]) { 
-			if( this.debug > 1 && subject != 'server' && action != 'ping' ) {
+			if( this.debug > 1 && subject != 'client' && action != 'ping' ) {
 				console.log( `[...${this.listener?.id?.substring( 32 )}] ${this.listener.constructor.name} is ignoring a ${subject} ${action} network message`, update );
 			}
 			return; 
@@ -43,7 +43,7 @@ PilseungFighter.Comms = class PSFComms {
 		if( update?.request && ! this.log?.[ subject ]?.[ action ]) { this.log[ subject ][ action ].push( update.request ); }
 
 		// Execute handler from the dispatch table
-		if( this.debug > 1 && subject != 'server' && action != 'ping' ) {
+		if( this.debug > 1 && subject != 'client' && action != 'ping' ) {
 			console.log( `[...${this.listener?.id?.substring( 32 )}] ${this.listener.constructor.name} is processing a ${subject} ${action} network message` );
 		}
 		this.table[ subject ][ action ]( update );
@@ -96,7 +96,7 @@ PilseungFighter.WebSocket = class PSFWebSocket {
 				let action  = update?.request?.action;
 				let request = update?.request;
 
-				if( this.comms.debug > 0 && ! (subject == 'server' && action == 'ping' )) {
+				if( this.comms.debug > 0 && ! (subject == 'client' && action == 'ping' )) {
 					if( update?.error ) {
 						console.log( 'SERVER ERROR', update );
 						if( this.listener?.alertify && this.listener?.debug ) {

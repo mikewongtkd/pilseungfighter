@@ -17,7 +17,7 @@ sub pong {
 	return unless $changed;
 
 	my $status   = $client->status();
-	my $response = { type => 'users', ringid => $ring, status => $status, request => $request };
+	my $response = { type => 'user', ringid => $ring, status => $status, request => $request };
 	$self->send->group( $response );
 }
 

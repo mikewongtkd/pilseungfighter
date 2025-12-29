@@ -68,7 +68,6 @@ sub new {
 
 	}
 
-	return unless defined $self;
 	$self->write();
 	return $self;
 }
@@ -336,7 +335,6 @@ sub set {
 	$key = noun( $key )->is_plural ? noun( $key )->singular : $key;
 
 	$self->{ data }{ $key } = $value;
-	return unless defined $self;
 	$self->write();
 	return $value;
 }
